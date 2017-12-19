@@ -1,0 +1,33 @@
+﻿{
+  // Extension ID: knldjmfmopnpolahpmmgbagdohdnhkik
+  //"key": "MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQDcBHwzDvyBQ6bDppkIs9MP4ksKqCMyXQ/A52JivHZKh4YO/9vJsT3oaYhSpDCE9RPocOEQvwsHsFReW2nUEc6OLLyoCFFxIb7KkLGsmfakkut/fFdNJYh0xOTbSN8YvLWcqph09XAY2Y/f0AL7vfO1cuCqtkMt8hFrBGWxDdf9CQIDAQAB",
+  "name": "NativeMessagingApiTest",
+  "version": "1.0",
+  "manifest_version": 2,
+  "description": "Send a message to a native application.",
+  "background": { "scripts": [ "jquery-3.2.1.min.js", "background.js" ] },
+  "browser_action": {
+    "default_icon": {
+      "19": "NEL_19.png",
+      "38": "NEL_38.png"
+    },
+    "default_title": "NativeMessagingApiTest",
+    "default_popup": "main.html"
+  },
+  "permissions": [
+    "nativeMessaging",
+    "tabs",
+    "*://localhost/*" //允许被操作的域名
+  ],
+  "content_scripts": [
+    {
+      "matches": [ "*://localhost/*" ], //允许注入的域名
+      "js": [ "jquery-3.2.1.min.js", "jquery.jsonrpc.js", "contentscript.js" ]
+    }
+  ]
+  //,
+  //"externally_connectable": {
+  //  "matches": [ "*://localhost/*" ] //允许发起调用扩展的域名
+  //}
+
+}

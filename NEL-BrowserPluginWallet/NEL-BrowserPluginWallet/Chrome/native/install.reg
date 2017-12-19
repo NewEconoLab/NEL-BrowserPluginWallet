@@ -1,0 +1,5 @@
+﻿Windows Registry Editor Version 5.00
+
+[HKEY_CURRENT_USER\Software\Google\Chrome\NativeMessagingHosts\com.my_company.my_application]
+@="D:\\lab_github\\NativeMessagingApiTest\\NativeMessagingApiTest\\NativeMessagingApiTest\\Chrome\\native\\native.json"
+

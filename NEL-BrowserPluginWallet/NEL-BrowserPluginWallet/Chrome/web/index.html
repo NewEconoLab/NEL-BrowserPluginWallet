@@ -1,0 +1,76 @@
+﻿<!DOCTYPE HTML>  
+  
+<html>  
+<head>  
+    <title>NEL NNS Tansfar</title>
+    <script src="jquery-2.0.0.min.js"></script>
+    <script type="text/javascript" src="jquery.jsonrpc.js"></script>
+    <script src='index.js'></script>
+<script>  
+//function startApp() {  
+//    var evt = document.createEvent("CustomEvent");  
+//    evt.initCustomEvent('myCustomEvent', true, false, "im information");  
+//    // fire the event  
+//    document.dispatchEvent(evt);  
+//}  
+  
+</script>  
+    <style type="text/css">
+        .auto-style1 {
+            width: 175px;
+        }
+        .auto-style2 {
+            width: 569px;
+        }
+        .auto-style3 {
+            width: 36px;
+            height: 35px;
+        }
+    </style>
+</head>  
+<body>  
+  <h1>NEL NNS Tansfar</h1>
+    <div id="datatable">
+        <table style="width:100%;">
+            <tr>
+                <td class="auto-style1">NNS</td>
+                <td>
+                    <input id="txtNNS" type="text" class="auto-style2" value="qingmingzi.neo" /><button id='butResolve'">resolve</button></td>
+            </tr>
+            <tr>
+                <td class="auto-style1">addrIn</td>
+                <td>
+                    <input id="txtAddrIn" type="text" class="auto-style2" /></td>
+            </tr>
+            <tr>
+                <td class="auto-style1">addrOut</td>
+                <td>
+                    <input id="txtAddrOut" type="text" class="auto-style2" /></td>
+            </tr>
+            <tr>
+                <td class="auto-style1">assetID</td>
+                <td>
+                    <select id="listAssetID" name="D1">
+                        <option value="602c79718b16e442de58778e148d0b1084e3b2dffd5de6b7b16cee7969282de7">GAS</option>
+                        <option value="c56f33fc6ecfcd0c225c4ab356fee59390af8560be0e930faebe74a6daff7c9b">NEO</option>
+                    </select></td>
+            </tr>
+            <tr>
+                <td class="auto-style1">amounts</td>
+                <td>
+                    <input id="txtAmounts" type="text" /></td>
+            </tr>
+            <tr>
+                <td class="auto-style1">
+                    <img id="txDone" alt="" src="./img/done.png" class="auto-style3" hidden="hidden" />
+                    &nbsp;TX
+                </td>
+                <td id="txScript">
+                    &nbsp;</td>
+            </tr>
+        </table>
+    </div>
+
+<button type="button" onClick="startApp()" id="startApp">startApp</button>  
+</body>  
+</html>  

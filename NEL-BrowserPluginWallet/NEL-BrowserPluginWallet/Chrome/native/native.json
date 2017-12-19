@@ -1,0 +1,9 @@
+﻿{
+  "name": "com.my_company.my_application",
+  "description": "Chrome sent message to native app.",
+  "path": "D:\\lab_github\\NativeMessagingApiTest\\NativeMessagingApiTest\\NativeMessagingApiTest\\bin\\Debug\\NativeMessagingApiTest.exe",
+  "type": "stdio",
+  "allowed_origins": [
+    "chrome-extension://aohahgbamhieiblkbofigfpfginkaamc/"
+  ]
+}
