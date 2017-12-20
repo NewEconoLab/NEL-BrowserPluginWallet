@@ -1,19 +1,44 @@
-﻿//function namehash() {
-//    var nns = $("#txtNNS").val();
+﻿$(document).ready(function () {
+    $('#butMakeTX').click(function (event) {
+        $.post("https://api.otcgo.cn/testnet/transfer",
+            {
+                dests: $("#txtAddrIn").val(),
+                source: $("#txtAddrOut").val(),
+                assetId: $("#listAssetID option:selected").val(),
+                amounts: $("#txtAmounts").val()
+            },
+            function (data, status) {
+                //alert("数据：" + data + "\n状态：" + status);
+                var dataJ = jQuery.parseJSON(data);
+                if (dataJ.result == true) {
+                    $("#txScript").text(dataJ.transaction);
+                }
+                else {
+                    $("#txScript").text('生成tx失败！');
+                }
+                
+                $("#txDone").show();
+            });
+    });
+    $('#butDoBroadcast').click(function (event) {
+        $.post("https://api.otcgo.cn/testnet/broadcast",
+            {
+                publicKey: $("#txPubkey").text(),
+                signature: $("#txSign").val(),
+                transaction: $("#txScript").val(),
+            },
+            function (data, status) {
+                //alert("数据：" + data + "\n状态：" + status);
+                var dataJ = jQuery.parseJSON(data);
+                if (dataJ.result == true) {
+                    $("#txid").text('txid:' + dataJ.txid);
+                    $("#txid").attr('href', 'https://neoscan-testnet.io/transaction/' + dataJ.txid)
+                }
+                else {
+                    $("#txid").val('txid:' + dataJ.error);
+                }
 
-//    // 我们希望与之通信的扩展程序标识符。
-//    var editorExtensionId = "aohahgbamhieiblkbofigfpfginkaamc";
-//    // 发送一个简单的请求：
-//    chrome.runtime.sendMessage(editorExtensionId, { key: "nns", value: nns },
-//        function(response) {
-//            alert(response.result);
-//        });
-//}
-
-
-
-//document.addEventListener('DOMContentLoaded', function () {
-//    document.getElementById('butResolve').addEventListener(
-//        'click', resolveNNS);
-
-//});
+                $("#txDone").show();
+            });
+    });
+});

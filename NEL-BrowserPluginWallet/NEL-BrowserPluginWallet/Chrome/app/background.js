@@ -57,7 +57,7 @@ function onNativeMessage(message) {
 }
 
 function namehash(nns) {
-    var hostName = "com.my_company.my_application";
+    var hostName = "nel.qingmingzi.pluginwallet";
     port = chrome.runtime.connectNative(hostName);
     port.onMessage.addListener(onNativeMessage);
 

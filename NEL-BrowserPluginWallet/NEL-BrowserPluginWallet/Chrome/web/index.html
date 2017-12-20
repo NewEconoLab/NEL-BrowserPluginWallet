@@ -3,9 +3,9 @@
 <html>  
 <head>  
     <title>NEL NNS Tansfar</title>
-    <script src="jquery-2.0.0.min.js"></script>
-    <script type="text/javascript" src="jquery.jsonrpc.js"></script>
-    <script src='index.js'></script>
+    <script src="./jquery-3.2.1.min.js"></script>
+    <script src="./jquery.jsonrpc.js"></script>
+    <script src='./index.js'></script>
 <script>  
 //function startApp() {  
 //    var evt = document.createEvent("CustomEvent");  
@@ -26,10 +26,21 @@
             width: 36px;
             height: 35px;
         }
+        .auto-style4 {
+            width: 150px;
+            height: 70px;
+        }
+        .auto-style5 {
+            width: 567px;
+            height: 71px;
+        }
     </style>
 </head>  
 <body>  
-  <h1>NEL NNS Tansfar</h1>
+  <h1 style="position:relative;">
+      <img src=".\img\nns_logo_small.png" class="auto-style4" />
+      <span style="position: absolute;top: 50%;transform: translateY(-50%);">Web NNS Tansfar Sample</span>
+  </h1>
     <div id="datatable">
         <table style="width:100%;">
             <tr>
@@ -65,12 +76,33 @@
                     <img id="txDone" alt="" src="./img/done.png" class="auto-style3" hidden="hidden" />
                     &nbsp;TX
                 </td>
-                <td id="txScript">
+                <td>
+                    <textarea id="txScript" class="auto-style5"></textarea>
+                    &nbsp;</td>
+            </tr>
+                        <tr>
+                <td class="auto-style1">
+                    <img id="txDonePubkey" alt="" src="./img/done.png" class="auto-style3" hidden="hidden" />
+                    &nbsp;pubkey
+                    (hide)</td>
+                <td>
+                    <input id="txPubkey" type="Hidden" />
+                    &nbsp;</td>
+            </tr>
+                        <tr>
+                <td class="auto-style1">
+                    <img id="txDoneSign" alt="" src="./img/done.png" class="auto-style3" hidden="hidden" />
+                    &nbsp;sign
+                </td>
+                <td>
+                    <textarea id="txSign" class="auto-style5"></textarea>
                     &nbsp;</td>
             </tr>
         </table>
     </div>
 
-<button type="button" onClick="startApp()" id="startApp">startApp</button>  
+<button id="butMakeTX">makeTX</button>
+<button id="butDoBroadcast">doBroadcast</button>  
+<a id="txid" href="#" target="_blank"></a>
 </body>  
 </html>  

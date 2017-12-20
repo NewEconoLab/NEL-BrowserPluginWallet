@@ -6,14 +6,15 @@
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProjectGuid>{349D92AE-8881-438D-AAFD-A18B471E27C3}</ProjectGuid>
     <OutputType>Exe</OutputType>
-    <RootNamespace>NativeMessagingApiTest</RootNamespace>
-    <AssemblyName>NativeMessagingApiTest</AssemblyName>
+    <RootNamespace>BrowserPluginWallet</RootNamespace>
+    <AssemblyName>BrowserPluginWallet</AssemblyName>
     <TargetFrameworkVersion>v4.7</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
     <TargetFrameworkProfile />
     <NuGetPackageImportStamp>
     </NuGetPackageImportStamp>
+    <IsWebBootstrapper>false</IsWebBootstrapper>
     <PublishUrl>publish\</PublishUrl>
     <Install>true</Install>
     <InstallFrom>Disk</InstallFrom>
@@ -26,7 +27,6 @@
     <MapFileExtensions>true</MapFileExtensions>
     <ApplicationRevision>0</ApplicationRevision>
     <ApplicationVersion>1.0.0.%2a</ApplicationVersion>
-    <IsWebBootstrapper>false</IsWebBootstrapper>
     <UseApplicationTrust>false</UseApplicationTrust>
     <BootstrapperEnabled>true</BootstrapperEnabled>
   </PropertyGroup>
@@ -264,6 +264,9 @@
     <None Include="packages.config">
       <SubType>Designer</SubType>
     </None>
+    <Content Include="protocol.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
   <ItemGroup>
     <Content Include="Chrome\app\background.js" />
@@ -279,9 +282,18 @@
     <Content Include="Chrome\app\NEL_38.png" />
     <Content Include="Chrome\web\img\done.jpg" />
     <Content Include="Chrome\web\img\done.png" />
+    <Content Include="Chrome\web\img\nns_logo_small.png" />
     <Content Include="Chrome\web\index.html" />
     <Content Include="Chrome\web\index.js" />
     <Content Include="Chrome\web\jquery.jsonrpc.js" />
+    <Content Include="x64\e_sqlite3.dll" />
+    <Content Include="x64\libleveldb.dll">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="x86\e_sqlite3.dll" />
+    <Content Include="x86\libleveldb.dll">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
   <ItemGroup>
     <BootstrapperPackage Include=".NETFramework,Version=v4.7">

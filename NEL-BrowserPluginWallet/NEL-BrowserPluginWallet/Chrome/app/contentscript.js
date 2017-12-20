@@ -68,6 +68,12 @@ chrome.extension.onMessage.addListener(
             //$("#txtNNS").val(request.data);
             sendResponse({ result: "NNShash Set" })
         }
+        else if (request.message == "getTx") {
+                var msg = {
+                    result: $("#txScript").val()
+                };
+                sendResponse(msg)
+        }
         else if (request.message == "getData") {
             var postInfo = $("#datatable");
             if (postInfo.length != 1) {
@@ -85,8 +91,10 @@ chrome.extension.onMessage.addListener(
             }
         }
         else if (request.message == "sendTX") {
-            $("#txScript").text("sendTX");
-            $("#txDone").show();
+            $("#txPubkey").text(request.pubkey);
+            $("#txSign").text(request.sign);
+            $("#txDonePubkey").show();
+            $("#txDoneSign").show();
         }
         else {
             $("#cb_post_title_url").text("bcd");
