@@ -1,6 +1,129 @@
 ﻿// Copyright 2013 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
+$.base64.utf8encode = true;
+$.base64.utf8decode = true; 
+var assetMap = {"0":1};
+//页面载入
+$(function(){
+    showWalletInfo();
+    //alert($.base64.encode("好人"));
+    //alert($.base64.decode($.base64.encode("好人")))  
+    //alert($.base64.decode(localStorage.wallet.replace("data:;base64,","")));
+});
+
+function walletClear() {
+    //alert('clr');
+    localStorage.walletFileName = '';
+    localStorage.wallet = '';
+    $("#walletName").text(localStorage.walletFileName);
+    $("#wallet").text(localStorage.wallet);
+}
+
+function changeFile() {
+    //alert('FileChange');
+    //alert($('#txtFile').val());
+    localStorage.walletFileName = $('#txtFile').val().replace('C:\\fakepath\\', '');
+
+    var oFReader = new FileReader();
+    var file = document.getElementById('txtFile').files[0];
+
+    //alert(getObjectURL(file));
+    oFReader.readAsDataURL(file);
+    oFReader.onloadend = function (oFRevent) {
+        src = oFRevent.target.result;
+        localStorage.wallet = src;
+
+        showWalletInfo();
+    }
+}
+
+function showWalletInfo() {
+    $("#walletName").text(localStorage.walletFileName);
+    $("#wallet").text(localStorage.wallet);
+
+    var walletData = JSON.parse($.base64.decode(localStorage.wallet.replace("data:;base64,", "")));
+    var wallets = new Array();
+    var assets = new Array();
+    $("#listAddress").empty();
+    $.each(walletData.accounts, function (index, value) {
+        wallets[index] = value.address;
+        assets[index] = value.asset;
+        $("#listAddress").append("<option value='" + value.address + "'>" + value.address + "</option>");
+    });
+    getBalance(wallets[0]);
+    localStorage.wallets = wallets;
+
+    $.map(assetMap, function (key, value) {
+        getAssetInfo(key);
+    });
+    $("#listAsset").empty();
+    $.map(assetMap, function (key, value) {
+        $("#listAsset").append("<option value='" + key + "'>" + value + "</option>");
+    });
+}
+
+function changeListAddress() {
+    var addrSelected = $("#listAddress").find("option:selected").text();
+    //alert(addrSelected);
+    getBalance(addrSelected);
+}
+
+function getAssetInfo(assetid) {
+    $.jsonRPC.setup({
+        endPoint: 'http://47.96.168.8:81/api/testnet',
+        namespace: ''
+    });
+    $.jsonRPC.request('getasset', {
+        params: [assetid],
+        success: function (data) {
+            var result = data.result
+            if (result != null) {
+                var assetName = result[0].name[0].name;
+                assetMap[assetid] = assetName;
+            }
+        }
+            //else {// "No Data!"}
+        //},
+        //error: function (data) {
+        //    return data.error.message;
+        //}
+    });
+}
+
+function getBalance(addr){
+    $.jsonRPC.setup({
+        endPoint: 'http://47.96.168.8:81/api/testnet',
+        namespace: ''
+    });
+    $.jsonRPC.request('getutxo', {
+        params: [addr],
+        success: function (data) {
+            var result = data.result
+            if (result != null) {
+
+                $.each(result, function (index, value) {
+                    var asset = value.asset;
+                    assetMap[asset] = "";
+                });
+
+                var balance = 0;
+                var assetSelected = $("#listAsset").find("option:selected").text();
+                $.each(result, function (index, value) {
+                    if (value.asset == assetSelected) {
+                        balance += Number(value.value);
+                    }
+                });
+                $('#balance').text(balance);
+            }
+            else { $('#balance').text("No Data!"); }
+        },
+        error: function (data) {
+            //alert(data.error.message);
+        }
+    });
+}
+
 var port = null;
 var getKeys = function (obj) {
     var keys = [];
@@ -145,6 +268,12 @@ document.addEventListener('DOMContentLoaded', function () {
         'click', getdata);
     document.getElementById('butSendTx').addEventListener(
         'click', sendTx);
+    document.getElementById('butWalletClear').addEventListener(
+        'click', walletClear);
+    document.getElementById('txtFile').addEventListener(
+        'change', changeFile);
+    document.getElementById('listAddress').addEventListener(
+        'change', changeListAddress);
     updateUiState();
 
     //var data = chrome.extension.getBackgroundPage().articleData;

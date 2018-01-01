@@ -44,24 +44,41 @@
 //	}
 //});
 var port = null;
+var hostName = "nel.qingmingzi.pluginwallet";
+port = chrome.runtime.connectNative(hostName);
+port.onMessage.addListener(onNativeMessage);
 
 function onNativeMessage(message) {
     chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
-        chrome.tabs.sendMessage(tabs[0].id, { message: "setNNShash", data:message.data }, function (response) {
-            //var result = document.createElement("div")
-            //result.textContent = response.result       
-            //document.body.appendChild(result)
-            //alert(response.result);
-        });
+        switch (message.data.key) {
+            case "namehash":
+                chrome.tabs.sendMessage(tabs[0].id, { message: "setNNShash", data: message.data.data }, function (response) {
+                    //var result = document.createElement("div")
+                    //result.textContent = response.result       
+                    //document.body.appendChild(result)
+                    //alert(response.result);
+                });
+                break;
+            case "openWallet":
+                chrome.tabs.sendMessage(tabs[0].id, { message: "setAddrOut", data: message.data.data }, function (response) {
+                    //var result = document.createElement("div")
+                    //result.textContent = response.result       
+                    //document.body.appendChild(result)
+                    //alert(response.result);
+                });
+                break;
+        }
     });
 }
 
 function namehash(nns) {
-    var hostName = "nel.qingmingzi.pluginwallet";
-    port = chrome.runtime.connectNative(hostName);
-    port.onMessage.addListener(onNativeMessage);
-
     message = { "text": "namehash","data": nns };
+    port.postMessage(message);
+}
+
+function openWallet(wallet) {
+    message = { "text": "openWallet", "wallet": wallet };
+    var a = JSON.stringify(message);
     port.postMessage(message);
 }
 
@@ -71,5 +88,9 @@ chrome.runtime.onMessage.addListener(
             var nns = request.value;
             namehash(nns);
             sendResponse({ result: "received:" + nns });
+        };
+        if (request.key == "getWallet") {
+            openWallet(localStorage.wallet);
+            sendResponse({ result: "received:" + localStorage.wallet });
         }
     });

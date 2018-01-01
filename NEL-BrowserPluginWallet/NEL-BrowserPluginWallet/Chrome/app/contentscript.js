@@ -28,7 +28,7 @@ function convertToHex(str) {
     return hex;
 }
 
-function resolveNNS(nns){
+function getBalance(nns){
     $.jsonRPC.setup({
         endPoint: 'http://101.89.140.195:20332',
         namespace: ''
@@ -44,7 +44,7 @@ function resolveNNS(nns){
 
         },
         error: function (data) {
-            alert(data.error.message);
+            //alert(data.error.message);
         }
     });
 }
@@ -56,6 +56,13 @@ $('#butResolve').click(function(event){
         });
 });
 
+$('#butGetWallet').click(function (event) {
+    chrome.runtime.sendMessage({ key: "getWallet" },
+        function (response) {
+            //$('#txtAddrOut').val(response.result);
+        });
+});
+
 chrome.extension.onMessage.addListener(
     function (request, sender, sendResponse) {
         if (request.message == "setTitel") {
@@ -63,10 +70,16 @@ chrome.extension.onMessage.addListener(
             sendResponse({ result: "告诉你" })
         }
         else if (request.message == "setNNShash") {
-            resolveNNS(request.data);
+            getBalance(request.data);
             //$('#txtAddrIn').val(res);
             //$("#txtNNS").val(request.data);
             sendResponse({ result: "NNShash Set" })
+        }
+        else if (request.message == "setAddrOut") {
+            $('#txtAddrOut').val(request.data);
+            //$('#txtAddrIn').val(res);
+            //$("#txtNNS").val(request.data);
+            sendResponse({ result: "AddrOut Set" })
         }
         else if (request.message == "getTx") {
                 var msg = {

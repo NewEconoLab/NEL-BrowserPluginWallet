@@ -6,6 +6,7 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using System.Windows.Forms;
 using Neo;
 using Neo.Core;
 using Neo.Implementations.Wallets.NEP6;
@@ -30,7 +31,7 @@ namespace BrowserPluginWallet
                 var processed = ProcessMessage(data);
                 //System.IO.File.WriteAllLines(@"log.txt", new string[] { "echo:",processed });
                 Write(processed);
-                if (processed == "exit")
+                if ((string)processed["key"] == "exit")
                 {
                     return;
                 }
@@ -114,92 +115,117 @@ namespace BrowserPluginWallet
             string fp = Environment.CurrentDirectory + @"\wallet.json";
             File.WriteAllText(fp, walletJson);
 
-            var PWS = data["PSW"].Value<string>();
+            string PWS = string.Empty;
+            using (allowUseWallet dialog = new allowUseWallet())
+            {
+                if (dialog.ShowDialog() != DialogResult.OK) return;
+                PWS = dialog.PSW;
 
-            wallet = new NEP6Wallet(fp);
-            try
-            {
-                wallet.Unlock(PWS);
-            }
-            catch (CryptographicException e)
-            {
-                //MessageBox.Show(Strings.PasswordIncorrect);
-                //return e.Message;
+                wallet = new NEP6Wallet(fp);
+                try
+                {
+                    wallet.Unlock(PWS);
+                }
+                catch (CryptographicException e)
+                {
+                    //MessageBox.Show(Strings.PasswordIncorrect);
+                    //return e.Message;
+                }
             }
         }
 
-        public static string ProcessMessage(JObject data)
+        public static JObject ProcessMessage(JObject data)
         {
+            JObject resJ = new JObject();
+
             var message = data["text"].Value<string>();
 
             switch (message)
             {
-                case "test":
-                    return "testing!";
-                case "exit":
-                    return "exit";
-                case "openWallet":
-                    openWallet(data);
-                    return wallet.GetAccounts().ToArray()[0].Address;
-                case "sign":
-                    var tx = data["Tx"].Value<string>();
-
-                    openWallet(data);
-                    var firstKey = wallet.GetAccounts().First().GetKey();
-                    string publickey = firstKey.PublicKey.EncodePoint(true).ToHexString();
-
-                    firstKey.Decrypt();
-                    var pk = firstKey.PrivateKey;
-
-                    string signature = Sign(tx.HexToBytes(), pk).ToHexString();
-
-                    var signStr = signature;
-
-                    return publickey + "|" + signStr;
                 case "namehash":
-                    try {
+                    try
+                    {
                         var nns = data["data"].Value<string>();
                         System.IO.File.WriteAllLines(@"log.txt", new string[] { "echo:", nns });
                         var Key = NameHash(nns);
-                        return Key.ToHexString();
-                    }         
+                        var KeyStr = Key.ToHexString();
+                        resJ["key"] = message;
+                        resJ["data"] = KeyStr;
+                    }
                     catch (Exception e)
                     {
                         System.IO.File.WriteAllLines(@"err.txt", new string[] { "error:", e.Message });
-                        return "请输入符合规则的域名";
+                        var KeyStr = "请输入符合规则的域名";
+                        resJ["key"] = message;
+                        resJ["data"] = KeyStr;
                     }
-                default:
-                    try
-                    {
-                        message = httpHelper.Get("https://api.otcgo.cn/testnet/address/" + message, new Dictionary<string, string>());
-                        JObject j = JObject.Parse(message);
-                        message = JsonConvert.SerializeObject(j["balances"]);
-                    }
-                    catch
-                    { }
- 
-                    
-                    return message;
-                    //return "echo: " + message;
+                    break;
+                case "openWallet":
+                    openWallet(data);
+                    try {
+                        string addr = wallet.GetAccounts().ToArray()[0].Address;
+                        resJ["key"] = message;
+                        resJ["data"] = addr;
+                    } catch{ }
+                    break;
+                    //case "test":
+                    //    resJ["key"]= message;
+                    //    resJ["data"] = "testing!";
+                    //    break;
+                    //case "exit":
+                    //    resJ["key"] = message;
+                    //    resJ["data"] = "exit!";
+                    //    break;
+
+                    //case "sign":
+                    //    var tx = data["Tx"].Value<string>();
+
+                    //    openWallet(data);
+                    //    var firstKey = wallet.GetAccounts().First().GetKey();
+                    //    string publickey = firstKey.PublicKey.EncodePoint(true).ToHexString();
+
+                    //    firstKey.Decrypt();
+                    //    var pk = firstKey.PrivateKey;
+
+                    //    string signature = Sign(tx.HexToBytes(), pk).ToHexString();
+
+                    //    var signStr = signature;
+
+                    //    return publickey + "|" + signStr;
+
+                    //default:
+                    //    try
+                    //    {
+                    //        message = httpHelper.Get("https://api.otcgo.cn/testnet/address/" + message, new Dictionary<string, string>());
+                    //        JObject j = JObject.Parse(message);
+                    //        message = JsonConvert.SerializeObject(j["balances"]);
+                    //    }
+                    //    catch
+                    //    { }
             }
+
+            return resJ;
         }
 
         public static JObject Read()
         {
-            //Stream inputStream = Console.OpenStandardInput(5000);
-            //Console.SetIn(new StreamReader(inputStream));
+            //byte[] inputBuffer = new byte[65535];
+            //Stream inputStream = Console.OpenStandardInput(inputBuffer.Length);
+            //Console.SetIn(new StreamReader(inputStream, Console.InputEncoding, false, inputBuffer.Length));
             //var str = Console.ReadLine(); //"{'text':'" + Console.ReadLine() + "'}";
             //return (JObject)JsonConvert.DeserializeObject<JObject>(str);
 
-            var stdin = Console.OpenStandardInput();
-            var length = 0;
+            byte[] inputBuffer = new byte[65535];
+            Stream inputStream = Console.OpenStandardInput(inputBuffer.Length);
 
-            var lengthBytes = new byte[4];
-            stdin.Read(lengthBytes, 0, 4);
+            int length = 0;
+
+            byte[] lengthBytes = new byte[4];
+            inputStream.Read(lengthBytes, 0, 4);
             length = BitConverter.ToInt32(lengthBytes, 0);
 
             var buffer = new char[length];
-            using (var reader = new StreamReader(stdin))
+            using (var reader = new StreamReader(inputStream, Console.InputEncoding, false, inputBuffer.Length))
             {
                 while (reader.Peek() >= 0)
                 {
@@ -210,7 +236,7 @@ namespace BrowserPluginWallet
             return (JObject)JsonConvert.DeserializeObject<JObject>(new string(buffer));
         }
 
-        public static void Write(JToken data)
+        public static void Write(JObject data)
         {
             var json = new JObject();
 

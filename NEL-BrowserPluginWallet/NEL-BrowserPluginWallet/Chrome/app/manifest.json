@@ -5,7 +5,7 @@
   "version": "1.0",
   "manifest_version": 2,
   "description": "A Browser Plugin Wallet for NEO",
-  "background": { "scripts": [ "jquery-3.2.1.min.js", "background.js" ] },
+  "background": { "scripts": [ "jquery-3.2.1.min.js", "jquery.jsonrpc.js", "jquery.base64.js", "background.js" ] },
   "browser_action": {
     "default_icon": {
       "19": "NEL_19.png",
