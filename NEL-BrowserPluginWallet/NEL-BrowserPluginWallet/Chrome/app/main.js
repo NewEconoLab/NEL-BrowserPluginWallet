@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 $.base64.utf8encode = true;
-$.base64.utf8decode = true; 
-var assetMap = {"0":1};
+$.base64.utf8decode = true;
+
 //页面载入
 $(function(){
     showWalletInfo();
@@ -14,10 +14,14 @@ $(function(){
 
 function walletClear() {
     //alert('clr');
-    localStorage.walletFileName = '';
-    localStorage.wallet = '';
+    localStorage.walletFileName = "";
+    localStorage.wallet = "";
+    localStorage.wallets = "";
+    localStorage.balances = ""
     $("#walletName").text(localStorage.walletFileName);
     $("#wallet").text(localStorage.wallet);
+    $("#listAddress").empty();
+    $("#tableBalance tr:not(:first)").remove();
 }
 
 function changeFile() {
@@ -41,85 +45,93 @@ function changeFile() {
 function showWalletInfo() {
     $("#walletName").text(localStorage.walletFileName);
     $("#wallet").text(localStorage.wallet);
+    $("#tableWallet tbody tr:eq(1)").hide();
 
     var walletData = JSON.parse($.base64.decode(localStorage.wallet.replace("data:;base64,", "")));
     var wallets = new Array();
-    var assets = new Array();
     $("#listAddress").empty();
     $.each(walletData.accounts, function (index, value) {
         wallets[index] = value.address;
-        assets[index] = value.asset;
         $("#listAddress").append("<option value='" + value.address + "'>" + value.address + "</option>");
     });
-    getBalance(wallets[0]);
+    getAddr(wallets[0]);
     localStorage.wallets = wallets;
-
-    $.map(assetMap, function (key, value) {
-        getAssetInfo(key);
-    });
-    $("#listAsset").empty();
-    $.map(assetMap, function (key, value) {
-        $("#listAsset").append("<option value='" + key + "'>" + value + "</option>");
-    });
 }
 
 function changeListAddress() {
     var addrSelected = $("#listAddress").find("option:selected").text();
     //alert(addrSelected);
-    getBalance(addrSelected);
+    getAddr(addrSelected);
 }
 
-function getAssetInfo(assetid) {
+//function getAssetInfo(assetid) {
+//    $.jsonRPC.setup({
+//        endPoint: 'http://47.96.168.8:81/api/testnet',
+//        namespace: ''
+//    });
+//    $.jsonRPC.request('getasset', {
+//        params: [assetid],
+//        success: function (data) {
+//            var result = data.result
+//            if (result != null) {
+//                var assetName = result[0].name[1].name;
+
+//                if (assetName == "AntShare") { assetName = "NEO" }
+//                else if (assetName == "AntCoin") { assetName = "GAS" }
+
+//                var assetMap = JSON.parse(localStorage.assetMap);
+//                assetMap[assetid] = assetName;
+//                $("#listAsset").append("<option value='" + assetid + "'>" + assetName + "</option>");
+//                localStorage.assetMap = JSON.stringify(assetMap);
+//            }
+//        }
+//            else {// "No Data!"}
+//        },
+//        error: function (data) {
+//            return data.error.message;
+//        }
+//    });
+//}
+
+function map2array(map) {
+    var list = [];
+    for (var key in map) {
+        list.push([key, map[key]]);
+    }
+    return list;
+};
+
+function getAddr(addr){
     $.jsonRPC.setup({
         endPoint: 'http://47.96.168.8:81/api/testnet',
         namespace: ''
     });
-    $.jsonRPC.request('getasset', {
-        params: [assetid],
-        success: function (data) {
-            var result = data.result
-            if (result != null) {
-                var assetName = result[0].name[0].name;
-                assetMap[assetid] = assetName;
-            }
-        }
-            //else {// "No Data!"}
-        //},
-        //error: function (data) {
-        //    return data.error.message;
-        //}
-    });
-}
-
-function getBalance(addr){
-    $.jsonRPC.setup({
-        endPoint: 'http://47.96.168.8:81/api/testnet',
-        namespace: ''
-    });
-    $.jsonRPC.request('getutxo', {
+    $.jsonRPC.request('getbalance', {
         params: [addr],
         success: function (data) {
             var result = data.result
             if (result != null) {
 
+                $("#tableBalance tr:not(:first)").remove();
                 $.each(result, function (index, value) {
                     var asset = value.asset;
-                    assetMap[asset] = "";
+                    var name = value.name[0].name;
+                    if (name == "小蚁股") { name = "NEO" }
+                    else if (name == "小蚁币") { name = "GAS" }
+                    value.name[0].name = name;
+                    var balance = value.balance
+                    var newRow = "<tr><td>" + asset + "</td><td>" + name + "</td><td>" + balance + "</td></tr>";
+                    $("#tableBalance tr:last").after(newRow);
                 });
+                $("#tableBalance tr td:nth-child(1)").hide();
 
-                var balance = 0;
-                var assetSelected = $("#listAsset").find("option:selected").text();
-                $.each(result, function (index, value) {
-                    if (value.asset == assetSelected) {
-                        balance += Number(value.value);
-                    }
-                });
-                $('#balance').text(balance);
+                localStorage.balances = JSON.stringify(result)
             }
             else { $('#balance').text("No Data!"); }
         },
         error: function (data) {
             //alert(data.error.message);
+            $("#tableBalance tr:not(:first)").remove();
         }
     });
 }
@@ -260,21 +272,21 @@ function getdata()
 //} 
 
 document.addEventListener('DOMContentLoaded', function () {
-    document.getElementById('connect-button').addEventListener(
-        'click', connect);
-    document.getElementById('send-message-button').addEventListener(
-        'click', sendNativeMessage);
-    document.getElementById('butGetData').addEventListener(
-        'click', getdata);
-    document.getElementById('butSendTx').addEventListener(
-        'click', sendTx);
+    //document.getElementById('connect-button').addEventListener(
+    //    'click', connect);
+    //document.getElementById('send-message-button').addEventListener(
+    //    'click', sendNativeMessage);
+    //document.getElementById('butGetData').addEventListener(
+    //    'click', getdata);
+    //document.getElementById('butSendTx').addEventListener(
+    //    'click', sendTx);
     document.getElementById('butWalletClear').addEventListener(
         'click', walletClear);
     document.getElementById('txtFile').addEventListener(
         'change', changeFile);
     document.getElementById('listAddress').addEventListener(
         'change', changeListAddress);
-    updateUiState();
+    //updateUiState();
 
     //var data = chrome.extension.getBackgroundPage().articleData;
     //if (data.error) {

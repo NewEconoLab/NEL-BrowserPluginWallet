@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Net;
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -20,7 +21,7 @@ namespace BrowserPluginWallet
 {
     class Program
     {
-        httpHelper hh = new httpHelper();
+        //httpHelper hh = new httpHelper();
         private static NEP6Wallet wallet;
 
         public static void Main(string[] args)
@@ -116,7 +117,7 @@ namespace BrowserPluginWallet
             File.WriteAllText(fp, walletJson);
 
             string PWS = string.Empty;
-            using (allowUseWallet dialog = new allowUseWallet())
+            using (allowUseWallet dialog = new allowUseWallet((string)data["addrIn"], (string)data["addrOut"], (string)data["assetID"], (string)data["amounts"]))
             {
                 if (dialog.ShowDialog() != DialogResult.OK) return;
                 PWS = dialog.PSW;
@@ -160,14 +161,66 @@ namespace BrowserPluginWallet
                         resJ["data"] = KeyStr;
                     }
                     break;
-                case "openWallet":
-                    openWallet(data);
-                    try {
-                        string addr = wallet.GetAccounts().ToArray()[0].Address;
+                case "doTansfar":
+                    JObject tansfarInfoJ = (JObject)data["tansfarInfo"];
+
+                    Dictionary<string, string> tansfarInfoDic = new Dictionary<string, string>() {
+                        { "source",(string)tansfarInfoJ["addrOut"]},
+                        { "dests",(string)tansfarInfoJ["addrIn"] },
+                        { "amounts",(string)tansfarInfoJ["amounts"] },
+                        { "assetId",((string)tansfarInfoJ["assetID"]).Replace("0x","")}
+                    };
+                    string resp = httpHelper.Post("https://api.otcgo.cn/testnet/transfer", tansfarInfoDic);
+                    JObject j = JObject.Parse(resp);
+                    string transactionScript = (string)j["transaction"];
+
+                    openWallet(tansfarInfoJ);
+                    try
+                    {
+                        string publickey = string.Empty;
+                        string signature = string.Empty;
+                        foreach (WalletAccount walletaccount in wallet.GetAccounts())
+                        {
+                            //根据输出地址选择key
+                            if (walletaccount.Address == tansfarInfoDic["source"])
+                            {
+                                KeyPair addrKey = walletaccount.GetKey();
+
+                                publickey = addrKey.PublicKey.EncodePoint(true).ToHexString();
+
+                                addrKey.Decrypt();
+                                var pk = addrKey.PrivateKey;
+
+                                signature = Sign(transactionScript.HexToBytes(), pk).ToHexString();
+
+                                break;
+                            }
+                        }
+
+                        Dictionary<string, string> signInfoDic = new Dictionary<string, string>() {
+                            { "publicKey",publickey},
+                            { "signature",signature },
+                            { "transaction",transactionScript },
+                        };
+                        string resp2 = httpHelper.Post("https://api.otcgo.cn/testnet/broadcast", signInfoDic);
+                        JObject j2 = JObject.Parse(resp2);
+                        string txid = (string)j2["txid"];
+
                         resJ["key"] = message;
-                        resJ["data"] = addr;
-                    } catch{ }
+                        resJ["data"] = txid;
+                    }
+                    catch { }
                     break;
+                //case "openWallet":
+                //    openWallet(data);
+                //    try
+                //    {
+                //        string addr = wallet.GetAccounts().ToArray()[0].Address;
+                //        resJ["key"] = message;
+                //        resJ["data"] = addr;
+                //    }
+                //    catch { }
+                //    break;
                     //case "test":
                     //    resJ["key"]= message;
                     //    resJ["data"] = "testing!";
@@ -177,21 +230,6 @@ namespace BrowserPluginWallet
                     //    resJ["data"] = "exit!";
                     //    break;
 
-                    //case "sign":
-                    //    var tx = data["Tx"].Value<string>();
-
-                    //    openWallet(data);
-                    //    var firstKey = wallet.GetAccounts().First().GetKey();
-                    //    string publickey = firstKey.PublicKey.EncodePoint(true).ToHexString();
-
-                    //    firstKey.Decrypt();
-                    //    var pk = firstKey.PrivateKey;
-
-                    //    string signature = Sign(tx.HexToBytes(), pk).ToHexString();
-
-                    //    var signStr = signature;
-
-                    //    return publickey + "|" + signStr;
 
                     //default:
                     //    try
@@ -233,7 +271,7 @@ namespace BrowserPluginWallet
                 }
             }
 
-            return (JObject)JsonConvert.DeserializeObject<JObject>(new string(buffer));
+            return JsonConvert.DeserializeObject<JObject>(new string(buffer));
         }
 
         public static void Write(JObject data)

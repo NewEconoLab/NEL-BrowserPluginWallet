@@ -24,6 +24,7 @@
     </style>
   </head>
   <body style="width: 552px">
+      <h3>NEL NEO插件钱包 技术预览版</h3>
       <table style="width:100%;">
           <tr>
               <td>
@@ -37,7 +38,7 @@
                   <input id="txtPSW" type="password" /></td>
           </tr>-->
       </table>
-    <table>
+    <table id="tableWallet">
 		<tr>
 			<td class="item-name" style="width:30%">walletName</td>
 			<td style="width:70%"><div id="walletName" class="auto-style1">&nbsp;</div></td>
@@ -54,20 +55,29 @@
                 </select>
 			</td>
 		</tr>
-        <tr>
+<!--        <tr>
 			<td class="item-name">asset</td>
 			<td>
                 <select id="listAsset">
 
                 </select>
 			</td>
-		</tr>
+		</tr>-->
         <tr>
 			<td class="item-name">balance</td>
-			<td><div id="balance" class="auto-style1">&nbsp;</div></td>
+			<td><div id="balance" class="auto-style1">
+                <table id="tableBalance" style="width:100%;">
+                    <tr>
+                        <td>asset</td>
+                        <td>assetname</td>
+                        <td>balance</td>
+                    </tr>
+                </table>
+                </div></td>
 		</tr>
 	</table>
-    <button id='connect-button'>Connect</button>
+
+    <!--<button id='connect-button'>Connect</button>
     <input id='input-text' type='text' />
     <button id='send-message-button'>Send</button>
     <div id='response'></div>
@@ -93,7 +103,7 @@
 			<td><div id="content-amounts" class="content-div">&nbsp;</div></td>
 		</tr>
 	</table>
-    <button id='butSendTx'>sendTx</button>
+    <button id='butSendTx'>sendTx</button>-->
 </div>
   </body>
 </html>

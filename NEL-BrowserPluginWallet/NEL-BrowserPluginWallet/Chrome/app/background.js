@@ -67,6 +67,14 @@ function onNativeMessage(message) {
                     //alert(response.result);
                 });
                 break;
+            case "doTansfar":
+                chrome.tabs.sendMessage(tabs[0].id, { message: "doTansfar", data: message.data.data }, function (response) {
+                    //var result = document.createElement("div")
+                    //result.textContent = response.result       
+                    //document.body.appendChild(result)
+                    //alert(response.result);
+                });
+                break;
         }
     });
 }
@@ -82,6 +90,13 @@ function openWallet(wallet) {
     port.postMessage(message);
 }
 
+function doTansfar(tansfarInfo) {
+    tansfarInfo["wallet"] = localStorage.wallet;
+    message = { "text": "doTansfar", "tansfarInfo": tansfarInfo };
+    var a = JSON.stringify(message);
+    port.postMessage(message);
+}
+
 chrome.runtime.onMessage.addListener(
     function (request, sender, sendResponse) {
         if (request.key == "nns") {
@@ -92,5 +107,14 @@ chrome.runtime.onMessage.addListener(
         if (request.key == "getWallet") {
             openWallet(localStorage.wallet);
             sendResponse({ result: "received:" + localStorage.wallet });
+        }
+        if (request.key == "getWallets") {
+            sendResponse({ result: localStorage.wallets });
+        }
+        if (request.key == "getbalances") {
+            sendResponse({ result: localStorage.balances });
+        }
+        if (request.key == "doTansfar") {
+            doTansfar(request.value);
         }
     });
