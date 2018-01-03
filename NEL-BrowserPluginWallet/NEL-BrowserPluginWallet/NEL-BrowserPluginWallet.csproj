@@ -269,9 +269,25 @@
     <None Include="Chrome\app\manifest.json" />
     <None Include="Chrome\native\install.reg" />
     <None Include="Chrome\native\native.json" />
+    <None Include="Edge\app\manifest.json" />
     <None Include="packages.config">
       <SubType>Designer</SubType>
     </None>
+    <Content Include="Edge\app\background.html" />
+    <Content Include="Edge\app\background.js" />
+    <Content Include="Edge\app\backgroundScriptsAPIBridge.js" />
+    <Content Include="Edge\app\contentscript.js" />
+    <Content Include="Edge\app\contentScriptsAPIBridge.js" />
+    <Content Include="Edge\app\icon.jpg" />
+    <Content Include="Edge\app\jquery-2.0.0.min.js" />
+    <Content Include="Edge\app\jquery-3.2.1.min.js" />
+    <Content Include="Edge\app\jquery.base64.js" />
+    <Content Include="Edge\app\jquery.jsonrpc.js" />
+    <Content Include="Edge\app\main.css" />
+    <Content Include="Edge\app\main.html" />
+    <Content Include="Edge\app\main.js" />
+    <Content Include="Edge\app\NEL_19.png" />
+    <Content Include="Edge\app\NEL_38.png" />
     <Content Include="protocol.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
@@ -320,6 +336,7 @@
       <DependentUpon>allowUseWallet.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="..\packages\SQLitePCLRaw.lib.e_sqlite3.linux.1.1.7\build\net35\SQLitePCLRaw.lib.e_sqlite3.linux.targets" Condition="Exists('..\packages\SQLitePCLRaw.lib.e_sqlite3.linux.1.1.7\build\net35\SQLitePCLRaw.lib.e_sqlite3.linux.targets')" />
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">

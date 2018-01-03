@@ -1,0 +1,109 @@
+﻿<!DOCTYPE html>
+<!--
+ * Copyright 2013 The Chromium Authors. All rights reserved.  Use of this
+ * source code is governed by a BSD-style license that can be found in the
+ * LICENSE file.
+-->
+<html>
+  <head>
+    <link rel="stylesheet" type="text/css" href="main.css" />
+    <script src="./jquery-3.2.1.min.js"></script>
+    <script src="./jquery.jsonrpc.js"></script>
+    <script src="./jquery.base64.js"></script>
+    <script src='./main.js'></script>
+    <style type="text/css">
+        .auto-style1 {
+            width: 432px;
+            white-space: nowrap;
+            overflow-x: hidden;
+            text-overflow: ellipsis;
+        }
+        .auto-style2 {
+            height: 28px;
+        }
+    </style>
+  </head>
+  <body style="width: 552px">
+      <h3>NEL NEO插件钱包 技术预览版</h3>
+      <table style="width:100%;">
+          <tr>
+              <td>
+                  <label for="txtFile">选择NEP6钱包(*.json)</label>
+                  <input id="txtFile" type="file" accept=".json" />
+                  <button id="butWalletClear" type="button">清除钱包</button>
+              </td>
+          </tr>
+<!--          <tr>
+              <td>
+                  <input id="txtPSW" type="password" /></td>
+          </tr>-->
+      </table>
+    <table id="tableWallet">
+		<tr>
+			<td class="item-name" style="width:30%">walletName</td>
+			<td style="width:70%"><div id="walletName" class="auto-style1">&nbsp;</div></td>
+		</tr>
+		<tr>
+			<td class="item-name">wallet</td>
+			<td><div id="wallet" class="auto-style1">&nbsp;</div></td>
+		</tr>
+        <tr>
+			<td class="item-name">address</td>
+			<td>
+                <select id="listAddress">
+
+                </select>
+			</td>
+		</tr>
+<!--        <tr>
+			<td class="item-name">asset</td>
+			<td>
+                <select id="listAsset">
+
+                </select>
+			</td>
+		</tr>-->
+        <tr>
+			<td class="item-name">balance</td>
+			<td><div id="balance" class="auto-style1">
+                <table id="tableBalance" style="width:100%;">
+                    <tr>
+                        <td>asset</td>
+                        <td>assetname</td>
+                        <td>balance</td>
+                    </tr>
+                </table>
+                </div></td>
+		</tr>
+	</table>
+
+    <!--<button id='connect-button'>Connect</button>
+    <input id='input-text' type='text' />
+    <button id='send-message-button'>Send</button>
+    <div id='response'></div>
+      <button id='butGetData'>getData</button>
+
+      <p id="message">加载中...</p>
+<div id="content">
+	<table>
+		<tr>
+			<td class="item-name" style="width:30%">addrIn</td>
+			<td style="width:70%"><div id="content-addrIn" class="auto-style1">&nbsp;</div></td>
+		</tr>
+		<tr>
+			<td class="item-name">addrOut</td>
+			<td><div id="content-addrOut" class="auto-style1">&nbsp;</div></td>
+		</tr>
+		<tr>
+			<td class="item-name">assetID</td>
+			<td><div id="content-assetID" class="auto-style1">&nbsp;</div></td>
+		</tr>
+		<tr>
+			<td class="item-name">amounts</td>
+			<td><div id="content-amounts" class="content-div">&nbsp;</div></td>
+		</tr>
+	</table>
+    <button id='butSendTx'>sendTx</button>-->
+</div>
+  </body>
+</html>
