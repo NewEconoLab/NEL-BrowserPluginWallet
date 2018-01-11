@@ -247,6 +247,15 @@ namespace BrowserPluginWallet
 
         public static JObject Read()
         {
+            string PSW = Console.ReadLine();
+            try {
+                var privateKeyHexStr = BitConverter.ToString(Wallet.GetPrivateKeyFromNEP2("6PYKrmHiax24CMSFK5qhQkZEBntE5WGDznuh3hvRz5JLKeqJYWMiqMC6yi", PSW)).Replace("-", "").ToLower();
+                Console.WriteLine(privateKeyHexStr);
+            }
+            catch {
+                Console.WriteLine("PSW Error！");
+            }
+            //MessageBox.Show(System.Text.Encoding.UTF8.GetString(Wallet.GetPrivateKeyFromNEP2("6PYKrmHiax24CMSFK5qhQkZEBntE5WGDznuh3hvRz5JLKeqJYWMiqMC6yi", "Terry1128")));
             //byte[] inputBuffer = new byte[65535];
             //Stream inputStream = Console.OpenStandardInput(inputBuffer.Length);
             //Console.SetIn(new StreamReader(inputStream, Console.InputEncoding, false, inputBuffer.Length));
