@@ -163,7 +163,32 @@ namespace BrowserPluginWallet
                     break;
                 case "doTansfar":
                     JObject tansfarInfoJ = (JObject)data["tansfarInfo"];
+                    //var walletJson = tansfarInfoJ["wallet"].Value<string>();
+                    //walletJson = walletJson.Split(',')[1];
+                    //walletJson = System.Text.Encoding.UTF8.GetString(Convert.FromBase64String(walletJson));
+                    //JObject Jwallet = JObject.Parse(walletJson);
+                    var key = (string)tansfarInfoJ["key"];
+                    //var scrypt = Jwallet["scrypt"];
+                    string PSW = string.Empty;
+                    using (allowUseWallet dialog = new allowUseWallet((string)tansfarInfoJ["addrIn"], (string)tansfarInfoJ["addrOut"], (string)tansfarInfoJ["assetID"], (string)tansfarInfoJ["amounts"]))
+                    {
+                        if (dialog.ShowDialog() == DialogResult.OK)
+                        {
+                            PSW = dialog.PSW;
+                        }           
+                    }
+                    //nep2key 6PYPh1msaJEUvhCkVMxq2Lfu31f3PjAcfQSXQre6vbQguY7ZQeZou5TiB9
+                    //nep2Key to privateKey
+                    byte[] privateKey = Wallet.GetPrivateKeyFromNEP2(key, PSW);
+                    string privateKeyHexStr = BitConverter.ToString(privateKey).Replace("-", "").ToLower();
+                    //privateKeyHexStr 25228cd2b2aeb4fec8065cadab8dc28cb618fba3a789853fcda357c37f0864c1
 
+                    //privateKey to publicKey
+                    byte[] publicKey = neoHelper.getPublickeyFromPrivateKey(privateKey);
+                    string publicKeyHexStr = BitConverter.ToString(publicKey).Replace("-", "").ToLower();
+                    //publicKeyHexStr 029020fd0914c677a1ab7d8b3502ca9a4506efbf7572ea24fb3862f48dd153ee5b
+
+                    //调用蓝鲸淘构造转账交易api
                     Dictionary<string, string> tansfarInfoDic = new Dictionary<string, string>() {
                         { "source",(string)tansfarInfoJ["addrOut"]},
                         { "dests",(string)tansfarInfoJ["addrIn"] },
@@ -174,42 +199,57 @@ namespace BrowserPluginWallet
                     JObject j = JObject.Parse(resp);
                     string transactionScript = (string)j["transaction"];
 
-                    openWallet(tansfarInfoJ);
-                    try
-                    {
-                        string publickey = string.Empty;
-                        string signature = string.Empty;
-                        foreach (WalletAccount walletaccount in wallet.GetAccounts())
-                        {
-                            //根据输出地址选择key
-                            if (walletaccount.Address == tansfarInfoDic["source"])
-                            {
-                                KeyPair addrKey = walletaccount.GetKey();
+                    string signature = Sign(transactionScript.HexToBytes(), privateKey).ToHexString();
 
-                                publickey = addrKey.PublicKey.EncodePoint(true).ToHexString();
-
-                                addrKey.Decrypt();
-                                var pk = addrKey.PrivateKey;
-
-                                signature = Sign(transactionScript.HexToBytes(), pk).ToHexString();
-
-                                break;
-                            }
-                        }
-
-                        Dictionary<string, string> signInfoDic = new Dictionary<string, string>() {
-                            { "publicKey",publickey},
+                    //调用蓝鲸淘发送交易api
+                    Dictionary<string, string> signInfoDic = new Dictionary<string, string>() {
+                            { "publicKey",publicKeyHexStr},
                             { "signature",signature },
                             { "transaction",transactionScript },
                         };
-                        string resp2 = httpHelper.Post("https://api.otcgo.cn/testnet/broadcast", signInfoDic);
-                        JObject j2 = JObject.Parse(resp2);
-                        string txid = (string)j2["txid"];
+                    string resp2 = httpHelper.Post("https://api.otcgo.cn/testnet/broadcast", signInfoDic);
+                    JObject j2 = JObject.Parse(resp2);
+                    string txid = (string)j2["txid"];
 
-                        resJ["key"] = message;
-                        resJ["data"] = txid;
-                    }
-                    catch { }
+                    resJ["key"] = message;
+                    resJ["data"] = txid;
+
+                    //openWallet(tansfarInfoJ);
+                    //try
+                    //{
+                    //    string publickey = string.Empty;
+                    //    string signature = string.Empty;
+                    //    foreach (WalletAccount walletaccount in wallet.GetAccounts())
+                    //    {
+                    //        //根据输出地址选择key
+                    //        if (walletaccount.Address == tansfarInfoDic["source"])
+                    //        {
+                    //            KeyPair addrKey = walletaccount.GetKey();
+
+                    //            publickey = addrKey.PublicKey.EncodePoint(true).ToHexString();
+
+                    //            addrKey.Decrypt();
+                    //            var pk = addrKey.PrivateKey;
+
+                    //            signature = Sign(transactionScript.HexToBytes(), pk).ToHexString();
+
+                    //            break;
+                    //        }
+                    //    }
+
+                    //    Dictionary<string, string> signInfoDic = new Dictionary<string, string>() {
+                    //        { "publicKey",publickey},
+                    //        { "signature",signature },
+                    //        { "transaction",transactionScript },
+                    //    };
+                    //    string resp2 = httpHelper.Post("https://api.otcgo.cn/testnet/broadcast", signInfoDic);
+                    //    JObject j2 = JObject.Parse(resp2);
+                    //    string txid = (string)j2["txid"];
+
+                    //    resJ["key"] = message;
+                    //    resJ["data"] = txid;
+                    //}
+                    //catch { }
                     break;
                 //case "openWallet":
                 //    openWallet(data);
@@ -247,40 +287,31 @@ namespace BrowserPluginWallet
 
         public static JObject Read()
         {
-            string PSW = Console.ReadLine();
-            try {
-                var privateKeyHexStr = BitConverter.ToString(Wallet.GetPrivateKeyFromNEP2("6PYKrmHiax24CMSFK5qhQkZEBntE5WGDznuh3hvRz5JLKeqJYWMiqMC6yi", PSW)).Replace("-", "").ToLower();
-                Console.WriteLine(privateKeyHexStr);
-            }
-            catch {
-                Console.WriteLine("PSW Error！");
-            }
-            //MessageBox.Show(System.Text.Encoding.UTF8.GetString(Wallet.GetPrivateKeyFromNEP2("6PYKrmHiax24CMSFK5qhQkZEBntE5WGDznuh3hvRz5JLKeqJYWMiqMC6yi", "Terry1128")));
-            //byte[] inputBuffer = new byte[65535];
-            //Stream inputStream = Console.OpenStandardInput(inputBuffer.Length);
-            //Console.SetIn(new StreamReader(inputStream, Console.InputEncoding, false, inputBuffer.Length));
-            //var str = Console.ReadLine(); //"{'text':'" + Console.ReadLine() + "'}";
-            //return (JObject)JsonConvert.DeserializeObject<JObject>(str);
-
             byte[] inputBuffer = new byte[65535];
             Stream inputStream = Console.OpenStandardInput(inputBuffer.Length);
+            Console.SetIn(new StreamReader(inputStream, Console.InputEncoding, false, inputBuffer.Length));
+            var str = Console.ReadLine(); //"{'text':'" + Console.ReadLine() + "'}";
+            return (JObject)JsonConvert.DeserializeObject<JObject>(str);
 
-            int length = 0;
+            //byte[] inputBuffer = new byte[65535];
+            //Stream inputStream = Console.OpenStandardInput(inputBuffer.Length);
 
-            byte[] lengthBytes = new byte[4];
-            inputStream.Read(lengthBytes, 0, 4);
-            length = BitConverter.ToInt32(lengthBytes, 0);
+            //int length = 0;
 
-            var buffer = new char[length];
-            using (var reader = new StreamReader(inputStream, Console.InputEncoding, false, inputBuffer.Length))
-            {
-                while (reader.Peek() >= 0)
-                {
-                    reader.Read(buffer, 0, buffer.Length);
-                }
-            }
+            //byte[] lengthBytes = new byte[4];
+            //inputStream.Read(lengthBytes, 0, 4);
+            //length = BitConverter.ToInt32(lengthBytes, 0);
 
-            return JsonConvert.DeserializeObject<JObject>(new string(buffer));
+            //var buffer = new char[length];
+            //using (var reader = new StreamReader(inputStream, Console.InputEncoding, false, inputBuffer.Length))
+            //{
+            //    while (reader.Peek() >= 0)
+            //    {
+            //        reader.Read(buffer, 0, buffer.Length);
+            //    }
+            //}
+
+            //return JsonConvert.DeserializeObject<JObject>(new string(buffer));
         }
 
         public static void Write(JObject data)

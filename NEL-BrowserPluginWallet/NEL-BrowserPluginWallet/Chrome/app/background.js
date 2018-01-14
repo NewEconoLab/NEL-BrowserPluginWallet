@@ -43,6 +43,10 @@
 //		});
 //	}
 //});
+
+$.base64.utf8encode = true;
+$.base64.utf8decode = true;
+
 var port = null;
 var hostName = "nel.qingmingzi.pluginwallet";
 port = chrome.runtime.connectNative(hostName);
@@ -91,7 +95,14 @@ function openWallet(wallet) {
 }
 
 function doTansfar(tansfarInfo) {
-    tansfarInfo["wallet"] = localStorage.wallet;
+    //tansfarInfo["wallet"] = localStorage.wallet;
+    var wallet = JSON.parse($.base64.decode(localStorage.wallet.replace("data:;base64,", "")));
+    $.each(wallet.accounts, function (index, value) {
+        if (value.address == tansfarInfo.addrOut) {
+            tansfarInfo["key"] = value.key;
+            return false;
+        }
+    });
     message = { "text": "doTansfar", "tansfarInfo": tansfarInfo };
     var a = JSON.stringify(message);
     port.postMessage(message);
