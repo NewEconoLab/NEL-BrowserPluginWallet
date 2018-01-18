@@ -179,7 +179,7 @@ namespace BrowserPluginWallet
                     }
                     //nep2key 6PYPh1msaJEUvhCkVMxq2Lfu31f3PjAcfQSXQre6vbQguY7ZQeZou5TiB9
                     //nep2Key to privateKey
-                    byte[] privateKey = Wallet.GetPrivateKeyFromNEP2(key, PSW);
+                    byte[] privateKey = neoHelper.GetPrivateKeyFromNEP2(key, PSW);
                     string privateKeyHexStr = BitConverter.ToString(privateKey).Replace("-", "").ToLower();
                     //privateKeyHexStr 25228cd2b2aeb4fec8065cadab8dc28cb618fba3a789853fcda357c37f0864c1
 
@@ -287,31 +287,31 @@ namespace BrowserPluginWallet
 
         public static JObject Read()
         {
-            byte[] inputBuffer = new byte[65535];
-            Stream inputStream = Console.OpenStandardInput(inputBuffer.Length);
-            Console.SetIn(new StreamReader(inputStream, Console.InputEncoding, false, inputBuffer.Length));
-            var str = Console.ReadLine(); //"{'text':'" + Console.ReadLine() + "'}";
-            return (JObject)JsonConvert.DeserializeObject<JObject>(str);
-
             //byte[] inputBuffer = new byte[65535];
             //Stream inputStream = Console.OpenStandardInput(inputBuffer.Length);
+            //Console.SetIn(new StreamReader(inputStream, Console.InputEncoding, false, inputBuffer.Length));
+            //var str = Console.ReadLine(); //"{'text':'" + Console.ReadLine() + "'}";
+            //return (JObject)JsonConvert.DeserializeObject<JObject>(str);
 
-            //int length = 0;
+            byte[] inputBuffer = new byte[65535];
+            Stream inputStream = Console.OpenStandardInput(inputBuffer.Length);
 
-            //byte[] lengthBytes = new byte[4];
-            //inputStream.Read(lengthBytes, 0, 4);
-            //length = BitConverter.ToInt32(lengthBytes, 0);
+            int length = 0;
 
-            //var buffer = new char[length];
-            //using (var reader = new StreamReader(inputStream, Console.InputEncoding, false, inputBuffer.Length))
-            //{
-            //    while (reader.Peek() >= 0)
-            //    {
-            //        reader.Read(buffer, 0, buffer.Length);
-            //    }
-            //}
+            byte[] lengthBytes = new byte[4];
+            inputStream.Read(lengthBytes, 0, 4);
+            length = BitConverter.ToInt32(lengthBytes, 0);
 
-            //return JsonConvert.DeserializeObject<JObject>(new string(buffer));
+            var buffer = new char[length];
+            using (var reader = new StreamReader(inputStream, Console.InputEncoding, false, inputBuffer.Length))
+            {
+                while (reader.Peek() >= 0)
+                {
+                    reader.Read(buffer, 0, buffer.Length);
+                }
+            }
+
+            return JsonConvert.DeserializeObject<JObject>(new string(buffer));
         }
 
         public static void Write(JObject data)
