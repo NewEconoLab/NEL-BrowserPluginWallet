@@ -12,6 +12,7 @@ using Neo;
 using Neo.Core;
 using Neo.Implementations.Wallets.NEP6;
 using Neo.SmartContract;
+using Neo.VM;
 using Neo.Wallets;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
@@ -195,26 +196,62 @@ namespace BrowserPluginWallet
                         { "amounts",(string)tansfarInfoJ["amounts"] },
                         { "assetId",((string)tansfarInfoJ["assetID"]).Replace("0x","")}
                     };
+                    var tansfarInfoDicStr = JsonConvert.SerializeObject(tansfarInfoDic);
+                    //{"source":"AYX8yqcvQroV9mJ5k4Ez2gro8Kjh7B78kD","dests":"AUb5MeSrTcmqBchWwsDVu8qgZ2Xv9E9ars","amounts":"0.01","assetId":"c56f33fc6ecfcd0c225c4ab356fee59390af8560be0e930faebe74a6daff7c9b"}
                     string resp = httpHelper.Post("https://api.otcgo.cn/testnet/transfer", tansfarInfoDic);
                     JObject j = JObject.Parse(resp);
                     string transactionScript = (string)j["transaction"];
+                    //80000001601715e825765452b25ab16979ce65a6705583dfebaa056c2a011aeda868dd4b0000029b7cffdaa674beae0f930ebe6085af9093e5fe56b34a5c220ccdcf6efc336fc540420f00000000008c8ed58be92fd1b01896dd9e02acd45776eb3e8c9b7cffdaa674beae0f930ebe6085af9093e5fe56b34a5c220ccdcf6efc336fc5c0878b3b00000000b7b0b2d92b970affd9567faf10205ca222e38933
+
+                    string txStr = string.Empty;
+                    //using (ScriptBuilder sb = new ScriptBuilder())
+                    //{
+                    //    sb.EmitAppCall(UInt160.Parse(tansfarInfoDic["assetId"]), "transfer",Wallet.ToScriptHash(tansfarInfoDic["dests"]), Wallet.ToScriptHash(tansfarInfoDic["source"]), tansfarInfoDic["amounts"]);
+                    //    sb.Emit(OpCode.THROWIFNOT);
+
+                    //    txStr = sb.ToArray().ToHexString();
+                    //}
+
+                    //string remark = "";
+                    //Transaction tx = new ContractTransaction();
+                    //List<TransactionAttribute> attributes = new List<TransactionAttribute>();
+                    //    attributes.Add(new TransactionAttribute
+                    //    {
+                    //        Usage = TransactionAttributeUsage.Remark,
+                    //        Data = Encoding.UTF8.GetBytes(remark)
+                    //    });
+                    //tx.Attributes = attributes.ToArray();
+                    //tx.Outputs = new TransactionOutput[]{ new TransactionOutput {
+                    //    AssetId = UInt256.Parse(tansfarInfoDic["assetId"]),
+                    //    Value = Fixed8.Parse(tansfarInfoDic["amounts"]),
+                    //    ScriptHash = Wallet.ToScriptHash(tansfarInfoDic["source"])
+                    //} };
+                    //tx.Inputs = new CoinReference[] { new CoinReference {
+                    //    PrevHash = UInt256.Parse("0x2926ca1fa51a54c50951be340a217d83035489da4cb9ea2dd46550e12d2234c3"),
+                    //    PrevIndex = 0
+                    //} };
+                    //var txScript = tx.GetHashData().ToHexString();
+
+                    txStr = getTransferTxHex(tansfarInfoDic["source"], tansfarInfoDic["dests"], "0x" + tansfarInfoDic["assetId"], decimal.Parse(tansfarInfoDic["amounts"]));
+                    string sign = Sign(txStr.HexToBytes(), privateKey).ToHexString();
+                    var txStr2 = getTxSignHex(txStr,sign,publicKeyHexStr);
 
                     string signature = Sign(transactionScript.HexToBytes(), privateKey).ToHexString();
 
-                    //调用蓝鲸淘发送交易api
-                    Dictionary<string, string> signInfoDic = new Dictionary<string, string>() {
-                            { "publicKey",publicKeyHexStr},
-                            { "signature",signature },
-                            { "transaction",transactionScript },
-                        };
-                    string resp2 = httpHelper.Post("https://api.otcgo.cn/testnet/broadcast", signInfoDic);
-                    JObject j2 = JObject.Parse(resp2);
-                    string txid = (string)j2["txid"];
+                    ////调用蓝鲸淘发送交易api
+                    //Dictionary<string, string> signInfoDic = new Dictionary<string, string>() {
+                    //        { "publicKey",publicKeyHexStr},
+                    //        { "signature",signature },
+                    //        { "transaction",transactionScript },
+                    //    };
+                    //string resp2 = httpHelper.Post("https://api.otcgo.cn/testnet/broadcast", signInfoDic);
+                    //JObject j2 = JObject.Parse(resp2);
+                    //string txid = (string)j2["txid"];
 
-                    resJ["key"] = message;
-                    resJ["data"] = txid;
+                    //resJ["key"] = message;
+                    //resJ["data"] = txid;
 
-                    //openWallet(tansfarInfoJ);
+                    
                     //try
                     //{
                     //    string publickey = string.Empty;
@@ -285,33 +322,109 @@ namespace BrowserPluginWallet
             return resJ;
         }
 
-        public static JObject Read()
+        
+        private static string getTransferTxHex(string addrOut,string addrIn,string assetID,decimal amounts)
         {
-            //byte[] inputBuffer = new byte[65535];
-            //Stream inputStream = Console.OpenStandardInput(inputBuffer.Length);
-            //Console.SetIn(new StreamReader(inputStream, Console.InputEncoding, false, inputBuffer.Length));
-            //var str = Console.ReadLine(); //"{'text':'" + Console.ReadLine() + "'}";
-            //return (JObject)JsonConvert.DeserializeObject<JObject>(str);
+            ThinNeo.Transaction lastTran;
 
-            byte[] inputBuffer = new byte[65535];
-            Stream inputStream = Console.OpenStandardInput(inputBuffer.Length);
+            string inputJson = "{ 'jsonrpc':'2.0','method':'getutxo','params':['" + addrOut +"'],'id':1}";
+            string outputJson = httpHelper.Post("http://47.96.168.8:81/api/testnet", inputJson);
+            JObject outputJ = JObject.Parse(outputJson);
+            //linq查找指定asset最大的utxo
+            var query = from utxos in outputJ["result"].Children()
+                        where (string)utxos["asset"] == assetID
+                        orderby (decimal)utxos["value"] descending
+                        select utxos;
+            var utxo = query.ToList()[0];
+            byte[] utxo_txid = ((string)utxo["txid"]).Replace("0x", "").HexToBytes().Reverse().ToArray();
+            ushort utxo_n = (ushort)utxo["n"];
+            decimal utxo_value = (decimal)utxo["value"];
+            byte[] assetBytes = assetID.Replace("0x", "").HexToBytes().Reverse().ToArray();
 
-            int length = 0;
-
-            byte[] lengthBytes = new byte[4];
-            inputStream.Read(lengthBytes, 0, 4);
-            length = BitConverter.ToInt32(lengthBytes, 0);
-
-            var buffer = new char[length];
-            using (var reader = new StreamReader(inputStream, Console.InputEncoding, false, inputBuffer.Length))
-            {
-                while (reader.Peek() >= 0)
-                {
-                    reader.Read(buffer, 0, buffer.Length);
-                }
+            if (amounts > utxo_value) {
+                return string.Empty;
             }
 
-            return JsonConvert.DeserializeObject<JObject>(new string(buffer));
+            lastTran = new ThinNeo.Transaction();
+            lastTran.type = ThinNeo.TransactionType.ContractTransaction;//转账
+            lastTran.attributes = new ThinNeo.Attribute[0];
+            lastTran.inputs = new ThinNeo.TransactionInput[1];
+            lastTran.inputs[0] = new ThinNeo.TransactionInput();
+            lastTran.inputs[0].hash = utxo_txid;//吃掉一个utxo
+            lastTran.inputs[0].index = utxo_n;
+
+            lastTran.outputs = new ThinNeo.TransactionOutput[2];
+            lastTran.outputs[0] = new ThinNeo.TransactionOutput();//给对方转账
+            lastTran.outputs[0].assetId = assetBytes;
+            lastTran.outputs[0].toAddress = ThinNeo.Helper.GetPublicKeyHashFromAddress(addrIn);
+            lastTran.outputs[0].value = amounts;
+            lastTran.outputs[1] = new ThinNeo.TransactionOutput();//给自己找零
+            lastTran.outputs[1].assetId = assetBytes;
+            lastTran.outputs[1].toAddress = ThinNeo.Helper.GetPublicKeyHashFromAddress(addrOut);
+            lastTran.outputs[1].value = utxo_value - amounts;
+            using (var ms = new System.IO.MemoryStream())
+            {
+                lastTran.SerializeUnsigned(ms);
+                return ThinNeo.Helper.Bytes2HexString(ms.ToArray());
+            }
+        }
+
+        private static string getTxSignHex(string txScriptHex,string signHex,string publicKeyHex)
+        {
+            byte[] txScript = txScriptHex.HexToBytes();
+            var sign = signHex.HexToBytes();
+            //byte[] prikey = privateKeyHex.HexToBytes();
+
+            //var prikeyStr = ThinNeo.Helper.Bytes2HexString(prikey);
+
+            //byte[] sign = null;
+
+            //sign = ThinNeo.Helper.Sign(txScript, prikey);
+
+            //var signStr = ThinNeo.Helper.Bytes2HexString(sign);
+
+            //var pubkey = ThinNeo.Helper.GetPublicKeyFromPrivateKey(prikey);
+            var pubkey = publicKeyHex.HexToBytes();
+            var addr = ThinNeo.Helper.GetAddressFromPublicKey(pubkey);
+
+            ThinNeo.Transaction lastTran = new ThinNeo.Transaction();
+            lastTran.Deserialize(new MemoryStream(txScriptHex.HexToBytes()));
+            lastTran.witnesses = null;
+            lastTran.AddWitness(sign, pubkey, addr);
+            using (var ms = new System.IO.MemoryStream())
+            {
+                lastTran.Serialize(ms);
+                return ThinNeo.Helper.Bytes2HexString(ms.ToArray());
+            }
+        }
+
+        public static JObject Read()
+        {
+            byte[] inputBuffer = new byte[65535];
+            Stream inputStream = Console.OpenStandardInput(inputBuffer.Length);
+            Console.SetIn(new StreamReader(inputStream, Console.InputEncoding, false, inputBuffer.Length));
+            var str = Console.ReadLine(); //"{'text':'" + Console.ReadLine() + "'}";
+            return (JObject)JsonConvert.DeserializeObject<JObject>(str);
+
+            //byte[] inputBuffer = new byte[65535];
+            //Stream inputStream = Console.OpenStandardInput(inputBuffer.Length);
+
+            //int length = 0;
+
+            //byte[] lengthBytes = new byte[4];
+            //inputStream.Read(lengthBytes, 0, 4);
+            //length = BitConverter.ToInt32(lengthBytes, 0);
+
+            //var buffer = new char[length];
+            //using (var reader = new StreamReader(inputStream, Console.InputEncoding, false, inputBuffer.Length))
+            //{
+            //    while (reader.Peek() >= 0)
+            //    {
+            //        reader.Read(buffer, 0, buffer.Length);
+            //    }
+            //}
+
+            //return JsonConvert.DeserializeObject<JObject>(new string(buffer));
         }
 
         public static void Write(JObject data)
