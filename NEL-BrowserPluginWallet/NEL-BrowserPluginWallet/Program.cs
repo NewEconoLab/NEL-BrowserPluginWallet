@@ -341,6 +341,9 @@ namespace BrowserPluginWallet
             decimal utxo_value = (decimal)utxo["value"];
             byte[] assetBytes = assetID.Replace("0x", "").HexToBytes().Reverse().ToArray();
 
+            var a = utxo_txid.ToHexString();
+            var b = assetBytes.ToHexString();
+
             if (amounts > utxo_value) {
                 return string.Empty;
             }
@@ -362,6 +365,12 @@ namespace BrowserPluginWallet
             lastTran.outputs[1].assetId = assetBytes;
             lastTran.outputs[1].toAddress = ThinNeo.Helper.GetPublicKeyHashFromAddress(addrOut);
             lastTran.outputs[1].value = utxo_value - amounts;
+
+            var c = ThinNeo.Helper.GetPublicKeyHashFromAddress(addrIn).ToHexString();
+            var d = amounts;
+            var e = ThinNeo.Helper.GetPublicKeyHashFromAddress(addrOut).ToHexString();
+            var f = utxo_value - amounts;
+
             using (var ms = new System.IO.MemoryStream())
             {
                 lastTran.SerializeUnsigned(ms);
