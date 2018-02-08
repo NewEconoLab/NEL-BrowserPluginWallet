@@ -43,6 +43,27 @@
 //		});
 //	}
 //});
+chrome.runtime.onMessage.addListener(
+    function (request, sender, sendResponse) {
+        if (request.key == "nns") {
+            var nns = request.value;
+            namehash(nns);
+            sendResponse({ result: "received:" + nns });
+        };
+        if (request.key == "getWallet") {
+            openWallet(localStorage.wallet);
+            sendResponse({ result: "received:" + localStorage.wallet });
+        }
+        if (request.key == "getWallets") {
+            sendResponse({ result: localStorage.wallets });
+        }
+        if (request.key == "getbalances") {
+            sendResponse({ result: localStorage.balances });
+        }
+        if (request.key == "doTansfar") {
+            doTansfar(request.value);
+        }
+    });
 
 $.base64.utf8encode = true;
 $.base64.utf8decode = true;
@@ -107,25 +128,3 @@ function doTansfar(tansfarInfo) {
     var a = JSON.stringify(message);
     port.postMessage(message);
 }
-
-chrome.runtime.onMessage.addListener(
-    function (request, sender, sendResponse) {
-        if (request.key == "nns") {
-            var nns = request.value;
-            namehash(nns);
-            sendResponse({ result: "received:" + nns });
-        };
-        if (request.key == "getWallet") {
-            openWallet(localStorage.wallet);
-            sendResponse({ result: "received:" + localStorage.wallet });
-        }
-        if (request.key == "getWallets") {
-            sendResponse({ result: localStorage.wallets });
-        }
-        if (request.key == "getbalances") {
-            sendResponse({ result: localStorage.balances });
-        }
-        if (request.key == "doTansfar") {
-            doTansfar(request.value);
-        }
-    });

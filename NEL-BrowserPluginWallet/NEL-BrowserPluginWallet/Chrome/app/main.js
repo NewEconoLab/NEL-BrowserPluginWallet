@@ -58,6 +58,20 @@ function showWalletInfo() {
     localStorage.wallets = wallets;
 }
 
+function showNeoDunInfo() {
+    $.get("http://127.0.0.1:50288/_api/listaddress", function (data) {
+        var wallets = new Array();
+        $("#listAddress").empty();
+        var J = JSON.parse(data);
+        $.each(J.addresses, function (index, value) {
+            wallets[index] = value.address;
+            $("#listAddress").append("<option value='" + value.address + "'>" + value.address + "</option>");
+        });
+        getAddr(wallets[0]);
+        localStorage.wallets = wallets;
+    });
+}
+
 function changeListAddress() {
     var addrSelected = $("#listAddress").find("option:selected").text();
     //alert(addrSelected);
@@ -282,6 +296,8 @@ document.addEventListener('DOMContentLoaded', function () {
     //    'click', sendTx);
     document.getElementById('butWalletClear').addEventListener(
         'click', walletClear);
+    document.getElementById('butImportNeoDun').addEventListener(
+        'click', showNeoDunInfo);
     document.getElementById('txtFile').addEventListener(
         'change', changeFile);
     document.getElementById('listAddress').addEventListener(

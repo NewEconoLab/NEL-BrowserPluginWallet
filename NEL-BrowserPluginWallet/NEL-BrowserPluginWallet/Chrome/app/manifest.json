@@ -15,7 +15,7 @@
     "default_popup": "main.html"
   },
   "permissions": [
-    "nativeMessaging",
+    //"nativeMessaging",
     "tabs",
     "*://localhost/*" //允许被操作的域名
   ],
