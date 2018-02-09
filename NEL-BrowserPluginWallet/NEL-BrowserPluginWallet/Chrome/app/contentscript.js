@@ -111,6 +111,59 @@ $('#doTansfar').click(function (event) {
         });
 });
 
+//执行NeoDun转账
+$('#doTansfarByNelApi').click(function (event) {
+    var addrIn = $("#txtAddrIn").val();
+    var addrOut = $("#listAddrOut option:selected").val();
+    var assetID = $("#listAssetID option:selected").val();
+    var amounts = $("#txtAmounts").val();
+
+    $.jsonRPC.setup({
+        endPoint: 'http://47.96.168.8:81/api/testnet',
+        namespace: ''
+    });
+    $.jsonRPC.request('gettransfertxhex', {
+        params: [addrOut, addrIn, assetID, amounts],
+        success: function (data) {
+            var result = data.result
+            if (result != null) {
+                var transfertxhex = result[0].transfertxhex;
+
+                $.get("http://127.0.0.1:50288/_api/sign?data=" + transfertxhex + "&source=" + addrOut, function (data) {
+                    //alert(data);
+                    var J = JSON.parse(data);
+                    var sign = J.signdata.toLowerCase();
+                    var pubkey = J.pubkey.toLowerCase();
+                    //alert(sign);
+                    //alert(pubkey);
+
+                    $.jsonRPC.setup({
+                        endPoint: 'http://47.96.168.8:81/api/testnet',
+                        namespace: ''
+                    });
+                    $.jsonRPC.request('sendtxplussign', {
+                        params: [transfertxhex, sign, pubkey],
+                        success: function (data) {
+                            var result = data.result
+                            if (result != null) {
+                                alert(result[0].sendrawtransactionresult);
+                            }
+                            else { }
+                        },
+                        error: function (data) {
+                            alert(data.error.message);
+                        }
+                    });
+                });
+            }
+            else {  }
+        },
+        error: function (data) {
+            alert(data.error.message);
+        }
+    });
+});
+
 $('#butResolve').click(function(event){
     chrome.runtime.sendMessage({ key: "nns", value: $('#txtNNS').val() },
         function (response) {
