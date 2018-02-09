@@ -279,6 +279,7 @@
     <None Include="packages.config">
       <SubType>Designer</SubType>
     </None>
+    <Content Include="Chrome\web\passwordMatrix.html" />
     <Content Include="Edge\app\background.html" />
     <Content Include="Edge\app\background.js" />
     <Content Include="Edge\app\backgroundScriptsAPIBridge.js" />
