@@ -129,6 +129,7 @@ $('#doTansfarByNelApi').click(function (event) {
             if (result != null) {
                 var transfertxhex = result[0].transfertxhex;
 
+                window.open('passwordMatrix.html', '', 'height=400, width=400');
                 $.get("http://127.0.0.1:50288/_api/sign?data=" + transfertxhex + "&source=" + addrOut, function (data) {
                     //alert(data);
                     var J = JSON.parse(data);
