@@ -72,6 +72,13 @@ function showNeoDunInfo() {
     });
 }
 
+//function addNeoDunAddr(addrWIF) {
+//    $.get("http://127.0.0.1:50288/_api/addaddress?wif=" + addrWIF, function (data) {
+//        //alert(JSON.stringify(data));
+//        showNeoDunInfo();
+//    });
+//}
+
 function changeListAddress() {
     var addrSelected = $("#listAddress").find("option:selected").text();
     //alert(addrSelected);
@@ -298,6 +305,8 @@ document.addEventListener('DOMContentLoaded', function () {
         'click', walletClear);
     document.getElementById('butImportNeoDun').addEventListener(
         'click', showNeoDunInfo);
+    //document.getElementById('butNeoDunAddrAdd').addEventListener(
+    //    'click', addNeoDunAddr($('#txtNeoDunAddr').val()));
     document.getElementById('txtFile').addEventListener(
         'change', changeFile);
     document.getElementById('listAddress').addEventListener(

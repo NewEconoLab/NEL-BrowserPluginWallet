@@ -46,6 +46,8 @@
 chrome.runtime.onMessage.addListener(
     function (request, sender, sendResponse) {
         if (request.key == "nns") {
+            //chrome.tabs.create({ url: "main.html" });
+
             var nns = request.value;
             namehash(nns);
             sendResponse({ result: "received:" + nns });
@@ -68,41 +70,41 @@ chrome.runtime.onMessage.addListener(
 $.base64.utf8encode = true;
 $.base64.utf8decode = true;
 
-var port = null;
-var hostName = "nel.qingmingzi.pluginwallet";
-port = chrome.runtime.connectNative(hostName);
-port.onMessage.addListener(onNativeMessage);
+//var port = null;
+//var hostName = "nel.qingmingzi.pluginwallet";
+//port = chrome.runtime.connectNative(hostName);
+//port.onMessage.addListener(onNativeMessage);
 
-function onNativeMessage(message) {
-    chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
-        switch (message.data.key) {
-            case "namehash":
-                chrome.tabs.sendMessage(tabs[0].id, { message: "setNNShash", data: message.data.data }, function (response) {
-                    //var result = document.createElement("div")
-                    //result.textContent = response.result       
-                    //document.body.appendChild(result)
-                    //alert(response.result);
-                });
-                break;
-            case "openWallet":
-                chrome.tabs.sendMessage(tabs[0].id, { message: "setAddrOut", data: message.data.data }, function (response) {
-                    //var result = document.createElement("div")
-                    //result.textContent = response.result       
-                    //document.body.appendChild(result)
-                    //alert(response.result);
-                });
-                break;
-            case "doTansfar":
-                chrome.tabs.sendMessage(tabs[0].id, { message: "doTansfar", data: message.data.data }, function (response) {
-                    //var result = document.createElement("div")
-                    //result.textContent = response.result       
-                    //document.body.appendChild(result)
-                    //alert(response.result);
-                });
-                break;
-        }
-    });
-}
+//function onNativeMessage(message) {
+//    chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
+//        switch (message.data.key) {
+//            case "namehash":
+//                chrome.tabs.sendMessage(tabs[0].id, { message: "setNNShash", data: message.data.data }, function (response) {
+//                    //var result = document.createElement("div")
+//                    //result.textContent = response.result       
+//                    //document.body.appendChild(result)
+//                    //alert(response.result);
+//                });
+//                break;
+//            case "openWallet":
+//                chrome.tabs.sendMessage(tabs[0].id, { message: "setAddrOut", data: message.data.data }, function (response) {
+//                    //var result = document.createElement("div")
+//                    //result.textContent = response.result       
+//                    //document.body.appendChild(result)
+//                    //alert(response.result);
+//                });
+//                break;
+//            case "doTansfar":
+//                chrome.tabs.sendMessage(tabs[0].id, { message: "doTansfar", data: message.data.data }, function (response) {
+//                    //var result = document.createElement("div")
+//                    //result.textContent = response.result       
+//                    //document.body.appendChild(result)
+//                    //alert(response.result);
+//                });
+//                break;
+//        }
+//    });
+//}
 
 function namehash(nns) {
     message = { "text": "namehash","data": nns };
