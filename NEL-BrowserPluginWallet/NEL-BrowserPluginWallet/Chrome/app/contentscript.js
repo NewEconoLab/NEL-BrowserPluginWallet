@@ -119,7 +119,8 @@ $('#doTansfarByNelApi').click(function (event) {
     var amounts = $("#txtAmounts").val();
 
     $.jsonRPC.setup({
-        endPoint: 'http://47.96.168.8:81/api/testnet',
+        //endPoint: 'http://localhost:59908/api/testnet',
+        endPoint: 'http://api.nel.group/api/testnet',
         namespace: ''
     });
     $.jsonRPC.request('gettransfertxhex', {
@@ -139,7 +140,8 @@ $('#doTansfarByNelApi').click(function (event) {
                     //alert(pubkey);
 
                     $.jsonRPC.setup({
-                        endPoint: 'http://47.96.168.8:81/api/testnet',
+                        //endPoint: 'http://localhost:59908/api/testnet',
+                        endPoint: 'http://api.nel.group/api/testnet',
                         namespace: ''
                     });
                     $.jsonRPC.request('sendtxplussign', {
@@ -147,7 +149,9 @@ $('#doTansfarByNelApi').click(function (event) {
                         success: function (data) {
                             var result = data.result
                             if (result != null) {
-                                alert(result[0].sendrawtransactionresult);
+                                alert("交易发送结果：" + result[0].sendrawtransactionresult);
+                                $("#txid").text('txid:0x' + result[0].txid);
+                                $("#txid").attr('href', 'http://be.nel.group/page/txInfo.html?txid=0x' + result[0].txid)
                             }
                             else { }
                         },
