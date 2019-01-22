@@ -52,6 +52,22 @@
 
 const nelApiUrl = 'https://api.nel.group/api/testnet';
 
+setBadgeText = (text) =>{
+    chrome.browserAction.setBadgeText({text: text});
+    chrome.browserAction.setBadgeBackgroundColor({color: [255, 0, 0, 255]});
+}
+setBadgeText('1');
+
+showNotify = (title,msg) =>{
+    chrome.notifications.create(null, {
+        type: 'basic',
+        iconUrl: 'NEL_38.png',
+        title: title,
+        message: msg
+    });
+}
+showNotify('后台提示','已经加载了后台js！')
+
 getBalanceByAddr = (addr,callback) => {
     $.jsonRPC.setup({
         endPoint: nelApiUrl,

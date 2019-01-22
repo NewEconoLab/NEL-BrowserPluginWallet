@@ -26,16 +26,21 @@
     "default_popup": "main.html"
   },
   "permissions": [
+    "notifications",
     "storage",
     "tabs",
-    "*://localhost/*" 
+    "http://*/*",
+    "https://*/*"  
   ],
   "web_accessible_resources": [
     "inject.js"
   ],
   "content_scripts": [
     {
-      "matches": [ "*://localhost/*" ], 
+      "matches": [         
+        "http://*/*",
+        "https://*/*" 
+      ], 
       "js": [ "jquery-3.2.1.min.js", "jquery.jsonrpc.js", "contentscript.js" ]
     }
   ]
