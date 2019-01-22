@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<!--
+ * Copyright 2013 The Chromium Authors. All rights reserved.  Use of this
+ * source code is governed by a BSD-style license that can be found in the
+ * LICENSE file.
+-->
+<html>
+  <head>
+    <title>确认页</title>
+    <script src="./jquery-3.2.1.min.js"></script>
+    <script src="./jquery.jsonrpc.js"></script>
+    <script src="./jquery.base64.js"></script>
+  </head>
+  <body>
+      <h1>你看到了一个通知</h1>
+      <img id="refIcoUrl" height="48" width="48"></img>
+      <br />
+      <h3 id="refTitle"></h3>
+      <h3 id="refDomain"></h3>
+      <h2>请求访问的你的钱包！</h2>
+      <div id = "TxInfo"></div>
+      <h2>输入钱包密码</h2>
+      <input type="password" id='passWord' />
+      <br />   
+      <button id='notify_ok'>ok</button>
+      <button id="notify_cancle">cancle</button>
+  </body>
+</html>

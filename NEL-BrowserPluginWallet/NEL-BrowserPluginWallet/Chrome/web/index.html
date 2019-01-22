@@ -2,7 +2,11 @@
   
 <html>  
 <head>  
-    <title>NEL-NNS Tansfar</title>
+    <link rel="shortcut icon" href="/favicon.ico">
+    <!-- <link rel="icon" type="image/x-icon" href="/favicon.ico" /> -->
+
+    <title>Temmo Sample</title>
+    
     <script src="./jquery-3.2.1.min.js"></script>
     <script src="./jquery.jsonrpc.js"></script>
     <script src='./index.js'></script>
@@ -36,15 +40,15 @@
 <body>  
   <h1 style="position:relative;">
       <img src=".\img\nns_logo_small.png" class="auto-style4" />
-      <span style="position: absolute;top: 50%;transform: translateY(-50%);">Web NNS Tansfar Sample</span>
+      <span style="position: absolute;top: 50%;transform: translateY(-50%);">Dapp Sample</span>
   </h1>
-    <div id="datatable">
+    <!-- <div id="datatable">
         <table style="width:100%;">
             <tr>
                 <td class="auto-style1">NNS</td>
                 <td>
                     <input id="txtNNS" type="text" class="auto-style2" value="qingmingzi.neo" />
-                    <button id='butResolve'">resolve</button>
+                    <button id='butResolve'>resolve</button>
                 </td>
             </tr>
             <tr>
@@ -56,23 +60,23 @@
                 <td class="auto-style1">addrOut</td>
                 <td>
                     <select id="listAddrOut" name="D1">
-                    </select>
+                    </select> -->
 <!--                    <input id="txtAddrOut" type="text" class="auto-style2" />-->
-                </td>
+                <!-- </td>
             </tr>
             <tr>
                 <td class="auto-style1">assetID</td>
                 <td>
-                    <select id="listAssetID" name="D1">
+                    <select id="listAssetID" name="D1"> -->
 <!--                        <option value="602c79718b16e442de58778e148d0b1084e3b2dffd5de6b7b16cee7969282de7">GAS</option>
                         <option value="c56f33fc6ecfcd0c225c4ab356fee59390af8560be0e930faebe74a6daff7c9b">NEO</option>-->
-                    </select></td>
+                    <!-- </select></td>
             </tr>
             <tr>
                 <td class="auto-style1">amounts</td>
                 <td>
                     <input id="txtAmounts" type="text" /></td>
-            </tr>
+            </tr> -->
 <!--            <tr>
                 <td class="auto-style1">
                     <img id="txDone" alt="" src="./img/done.png" class="auto-style3" hidden="hidden" />
@@ -100,16 +104,41 @@
                     <textarea id="txSign" class="auto-style5"></textarea>
                     &nbsp;</td>
             </tr>-->
-        </table>
-    </div>
-    <hr />
+        <!-- </table>
+    </div> -->
+    <!-- <hr />
     <button id="doTansfar" class="auto-style5">doTansfar</button>
-    <button id="doTansfarByNelApi" class="auto-style5">doTansfarByNelApi</button>
+    <button id="doTansfarByNelApi" class="auto-style5">doTansfarByNelApi</button> -->
     <!--<button class="auto-style5" onclick="window.open ('passwordMatrix.html', '', 'height=400, width=400');">getPassword</button>-->
     <!--<input type="hidden" id="PSWhidden">-->
-<!--<button id='butGetWallet'">getWallet</button>
-<button id="butMakeTX">makeTX</button>
-<button id="butDoBroadcast">doBroadcast</button>  -->
+<hr />
+<button id='butGetAccount'>执行获取账户基本信息</button>
+<p id = 'addr'>addr</p>
+<!-- <p id = 'balance'>balance</p> -->
+<select id="listAssetID"></select>
+<hr />
+转账金额<input id="transferValue" type="text" size=20 value='0.01'>
+<button id='butDoTarnsferTest'>执行测试transfer</button>
+<hr />
+<p>ScriptHash</p>
+<br />
+<input id='invokeScriptHash' type="text" size="40" value='5fd8c2aed0eec0fa103f6fba16748b453baf5b2e' />
+<br />
+<p>inputParams</p>
+<br />
+<textarea id='invokeParam' rows="10" cols="50">[
+    "(str)startAuction",
+    [
+      "(addr)ASBhJFN3XiDu38EdEQyMY3N2XwGh1gd5WW",
+      "(hex256)080af0b0156c5dd12c820b2b1b4fbfa315d05ac5a0ea2f9a657d4c8881d0869f",
+      "(str)qmz2"
+    ]
+  ]</textarea>
+<br />
+<button id="butDoInvokeTest">执行测试invoke</button>
+<br />
+<hr />
+<!-- <button id="butDoBroadcast">doBroadcast</button>  --> 
 <br />
 <a id="txid" href="#" target="_blank"></a>
 </body>  

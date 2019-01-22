@@ -4,13 +4,24 @@
 $.base64.utf8encode = true;
 $.base64.utf8decode = true;
 
+
 //页面载入
 $(function(){
+    //alert(localStorage.wallet);
+
     showWalletInfo();
     //alert($.base64.encode("好人"));
     //alert($.base64.decode($.base64.encode("好人")))  
     //alert($.base64.decode(localStorage.wallet.replace("data:;base64,","")));
 });
+
+sendMsg2BG = Msg => {
+    chrome.runtime.sendMessage(Msg,function(response){
+        console.log('content get response:',response.result);
+        //alert("MsgFromBG:" + response.result);
+    });
+}
+
 
 function walletClear() {
     //alert('clr');
@@ -24,6 +35,17 @@ function walletClear() {
     $("#tableBalance tr:not(:first)").remove();
 }
 
+// $('.upload').click(function(e){
+//     var target = e.target
+//     var file = targe.files[0]
+//     var reader = new FileReader()
+//     reader.readAsText(file);
+//     reader.onload = function(){
+//         var result = JSON.parse(this.result)[0]
+//         console.info(JSON.stringify(result));
+//     }
+// })
+
 function changeFile() {
     //alert('FileChange');
     //alert($('#txtFile').val());
@@ -33,9 +55,10 @@ function changeFile() {
     var file = document.getElementById('txtFile').files[0];
 
     //alert(getObjectURL(file));
-    oFReader.readAsDataURL(file);
+    oFReader.readAsText(file);
     oFReader.onloadend = function (oFRevent) {
         src = oFRevent.target.result;
+        console.info(src);
         localStorage.wallet = src;
 
         showWalletInfo();
@@ -43,19 +66,25 @@ function changeFile() {
 }
 
 function showWalletInfo() {
-    $("#walletName").text(localStorage.walletFileName);
-    $("#wallet").text(localStorage.wallet);
-    $("#tableWallet tbody tr:eq(1)").hide();
+    if ( localStorage.wallet !== null)
+    {
+        $("#walletName").text(localStorage.walletFileName);
+        $("#wallet").text(localStorage.wallet);
+        $("#tableWallet tbody tr:eq(1)").hide();
 
-    var walletData = JSON.parse($.base64.decode(localStorage.wallet.replace("data:;base64,", "")));
-    var wallets = new Array();
-    $("#listAddress").empty();
-    $.each(walletData.accounts, function (index, value) {
-        wallets[index] = value.address;
-        $("#listAddress").append("<option value='" + value.address + "'>" + value.address + "</option>");
-    });
-    getAddr(wallets[0]);
-    localStorage.wallets = wallets;
+        var walletData = JSON.parse(localStorage.wallet);
+        var wallets = new Array();
+        $("#listAddress").empty();
+        $.each(walletData.accounts, function (index, value) {
+            wallets[index] = value.address;
+            $("#listAddress").append("<option value='" + value.address + "'>" + value.address + "</option>");
+
+            //sendMsg2BG({key:'gettransfertxhex', from : value.address , to : value.address, asset : "0x602c79718b16e442de58778e148d0b1084e3b2dffd5de6b7b16cee7969282de7" ,value:0.01})
+            sendMsg2BG({key:'getBalanceByAddr', message : value.address})
+        });
+        //getAddr(wallets[0]);
+        localStorage.wallets = wallets;
+    }
 }
 
 function showNeoDunInfo() {
@@ -122,40 +151,62 @@ function map2array(map) {
     return list;
 };
 
-function getAddr(addr){
-    $.jsonRPC.setup({
-        endPoint: 'http://47.96.168.8:81/api/testnet',
-        namespace: ''
-    });
-    $.jsonRPC.request('getbalance', {
-        params: [addr],
-        success: function (data) {
-            var result = data.result
-            if (result != null) {
-
-                $("#tableBalance tr:not(:first)").remove();
-                $.each(result, function (index, value) {
-                    var asset = value.asset;
-                    var name = value.name[0].name;
-                    if (name == "小蚁股") { name = "NEO" }
-                    else if (name == "小蚁币") { name = "GAS" }
-                    value.name[0].name = name;
-                    var balance = value.balance
-                    var newRow = "<tr><td>" + asset + "</td><td>" + name + "</td><td>" + balance + "</td></tr>";
-                    $("#tableBalance tr:last").after(newRow);
-                });
-                $("#tableBalance tr td:nth-child(1)").hide();
-
-                localStorage.balances = JSON.stringify(result)
-            }
-            else { $('#balance').text("No Data!"); }
-        },
-        error: function (data) {
-            //alert(data.error.message);
-            $("#tableBalance tr:not(:first)").remove();
-        }
-    });
+function showBalance(data){ 
+    result = JSON.parse(data);
+    if (result !== null) {
+        $("#tableBalance tr:not(:first)").remove();
+        $.each(result, function (index, value) {
+            var asset = value.asset;
+            var name = value.name[0].name;
+            if (name === "小蚁股") { name = "NEO" }
+            else if (name === "小蚁币") { name = "GAS" }
+            value.name[0].name = name;
+            var balance = value.balance
+            var newRow = "<tr><td>" + asset + "</td><td>" + name + "</td><td>" + balance + "</td></tr>";
+            $("#tableBalance tr:last").after(newRow);
+        });
+        $("#tableBalance tr td:nth-child(1)").hide();
+    }
+    else {
+        $('#balance').text("No Data!");
+        $("#tableBalance tr:not(:first)").remove();
+    }
 }
+
+// function getAddr(addr){
+//     $.jsonRPC.setup({
+//         endPoint: 'https://api.nel.group/api/testnet',
+//         namespace: ''
+//     });
+//     $.jsonRPC.request('getbalance', {
+//         params: [addr],
+//         success: function (data) {
+//             var result = data.result
+//             if (result !== null) {
+
+//                 $("#tableBalance tr:not(:first)").remove();
+//                 $.each(result, function (index, value) {
+//                     var asset = value.asset;
+//                     var name = value.name[0].name;
+//                     if (name === "小蚁股") { name = "NEO" }
+//                     else if (name === "小蚁币") { name = "GAS" }
+//                     value.name[0].name = name;
+//                     var balance = value.balance
+//                     var newRow = "<tr><td>" + asset + "</td><td>" + name + "</td><td>" + balance + "</td></tr>";
+//                     $("#tableBalance tr:last").after(newRow);
+//                 });
+//                 $("#tableBalance tr td:nth-child(1)").hide();
+
+//                 localStorage.balances = JSON.stringify(result)
+//             }
+//             else { $('#balance').text("No Data!"); }
+//         },
+//         error: function (data) {
+//             //alert(data.error.message);
+//             $("#tableBalance tr:not(:first)").remove();
+//         }
+//     });
+// }
 
 var port = null;
 var getKeys = function (obj) {
@@ -179,106 +230,106 @@ function updateUiState() {
         document.getElementById('send-message-button').style.display = 'none';
     }
 }
-function sendNativeMessage() {
-    //chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
-    //    chrome.tabs.sendMessage(tabs[0].id, { message: "setTitel2" }, function (response) {
-    //        //var result = document.createElement("div")
-    //        //result.textContent = response.result       
-    //        //document.body.appendChild(result)
-    //        appendMessage("response message: <b>" + response.result + "</b>");
-    //    });
-    //});  
-    var oFReader = new FileReader();
-    var file = document.getElementById('txtFile').files[0];
-    //alert(getObjectURL(file));
-    oFReader.readAsDataURL(file);
-    oFReader.onloadend = function (oFRevent) {
-        src = oFRevent.target.result;
+// function sendNativeMessage() {
+//     //chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
+//     //    chrome.tabs.sendMessage(tabs[0].id, { message: "setTitel2" }, function (response) {
+//     //        //var result = document.createElement("div")
+//     //        //result.textContent = response.result       
+//     //        //document.body.appendChild(result)
+//     //        appendMessage("response message: <b>" + response.result + "</b>");
+//     //    });
+//     //});  
+//     var oFReader = new FileReader();
+//     var file = document.getElementById('txtFile').files[0];
+//     //alert(getObjectURL(file));
+//     oFReader.readAsDataURL(file);
+//     oFReader.onloadend = function (oFRevent) {
+//         src = oFRevent.target.result;
 
-        message = { "text": document.getElementById('input-text').value, "wallet": src, "PSW": $('#txtPSW').val() };
-        var a = JSON.stringify(message);
-        port.postMessage(message);
-        appendMessage("Sent message: <b>" + JSON.stringify(message) + "</b>");
-        //alert(JSON.stringify(message))
-    }
-}
+//         message = { "text": document.getElementById('input-text').value, "wallet": src, "PSW": $('#txtPSW').val() };
+//         var a = JSON.stringify(message);
+//         port.postMessage(message);
+//         appendMessage("Sent message: <b>" + JSON.stringify(message) + "</b>");
+//         //alert(JSON.stringify(message))
+//     }
+// }
 
-function sendTx(data) {
-    var pubkeyStr = data.split('|')[0];
-    var signStr = data.split('|')[1];
-    chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
-        chrome.tabs.sendMessage(tabs[0].id, { message: "sendTX", pubkey: data.split('|')[0], sign: data.split('|')[1] }, function (response) {
-            var data = response
-        });
-    });
-}
+// function sendTx(data) {
+//     var pubkeyStr = data.split('|')[0];
+//     var signStr = data.split('|')[1];
+//     chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
+//         chrome.tabs.sendMessage(tabs[0].id, { message: "sendTX", pubkey: data.split('|')[0], sign: data.split('|')[1] }, function (response) {
+//             var data = response
+//         });
+//     });
+// }
 
-function onNativeMessage(message) {
-    appendMessage("Received message: <b>" + JSON.stringify(message) + "</b>");
+// function onNativeMessage(message) {
+//     appendMessage("Received message: <b>" + JSON.stringify(message) + "</b>");
 
-    if (message.data.split('|')[1] != null) {
-        sendTx(message.data)
-    }
+//     if (message.data.split('|')[1] !== null) {
+//         sendTx(message.data)
+//     }
 
-    //chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
-    //    chrome.tabs.sendMessage(tabs[0].id, { message: "setNNShash", data: JSON.stringify(message.data) }, function (response) {
-    //        //var result = document.createElement("div")
-    //        //result.textContent = response.result       
-    //        //document.body.appendChild(result)
-    //        appendMessage("response message: <b>" + response.result + "</b>");
-    //    });
-    //});
-}
-function onDisconnected() {
-    appendMessage("Failed to connect: " + chrome.runtime.lastError.message);
-    port = null;
-    updateUiState();
-}
-function connect() {
-    //chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
-    //    chrome.tabs.sendMessage(tabs[0].id, { message: "setTitel" }, function (response) {
-    //        //var result = document.createElement("div")
-    //        //result.textContent = response.result       
-    //        //document.body.appendChild(result)
-    //        appendMessage("response message: <b>" + response.result + "</b>");
-    //    });
-    //});  
+//     //chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
+//     //    chrome.tabs.sendMessage(tabs[0].id, { message: "setNNShash", data: JSON.stringify(message.data) }, function (response) {
+//     //        //var result = document.createElement("div")
+//     //        //result.textContent = response.result       
+//     //        //document.body.appendChild(result)
+//     //        appendMessage("response message: <b>" + response.result + "</b>");
+//     //    });
+//     //});
+// }
+// function onDisconnected() {
+//     appendMessage("Failed to connect: " + chrome.runtime.lastError.message);
+//     port = null;
+//     updateUiState();
+// }
+// function connect() {
+//     //chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
+//     //    chrome.tabs.sendMessage(tabs[0].id, { message: "setTitel" }, function (response) {
+//     //        //var result = document.createElement("div")
+//     //        //result.textContent = response.result       
+//     //        //document.body.appendChild(result)
+//     //        appendMessage("response message: <b>" + response.result + "</b>");
+//     //    });
+//     //});  
 
-    var hostName = "nel.qingmingzi.pluginwallet";
-    appendMessage("Connecting to native messaging host <b>" + hostName + "</b>")
-    port = chrome.runtime.connectNative(hostName);
-    port.onMessage.addListener(onNativeMessage);
-    port.onDisconnect.addListener(onDisconnected);
-    updateUiState();
-}
+//     var hostName = "nel.qingmingzi.pluginwallet";
+//     appendMessage("Connecting to native messaging host <b>" + hostName + "</b>")
+//     port = chrome.runtime.connectNative(hostName);
+//     port.onMessage.addListener(onNativeMessage);
+//     port.onDisconnect.addListener(onDisconnected);
+//     updateUiState();
+// }
 
-function getdata()
-{
-    chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
-        chrome.tabs.sendMessage(tabs[0].id, { message: "getTx" }, function (response) {
-            appendMessage("response message: <b>" + response.result + "</b>");
-            var Tx = response.result;
+// function getdata()
+// {
+//     chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
+//         chrome.tabs.sendMessage(tabs[0].id, { message: "getTx" }, function (response) {
+//             appendMessage("response message: <b>" + response.result + "</b>");
+//             var Tx = response.result;
 
-            var oFReader = new FileReader();
-            var file = document.getElementById('txtFile').files[0];
-            //alert(getObjectURL(file));
-            oFReader.readAsDataURL(file);
-            oFReader.onloadend = function (oFRevent) {
-                src = oFRevent.target.result;
+//             var oFReader = new FileReader();
+//             var file = document.getElementById('txtFile').files[0];
+//             //alert(getObjectURL(file));
+//             oFReader.readAsDataURL(file);
+//             oFReader.onloadend = function (oFRevent) {
+//                 src = oFRevent.target.result;
 
-                var hostName = "nel.qingmingzi.pluginwallet";
-                port = chrome.runtime.connectNative(hostName);
-                port.onMessage.addListener(onNativeMessage);
+//                 var hostName = "nel.qingmingzi.pluginwallet";
+//                 port = chrome.runtime.connectNative(hostName);
+//                 port.onMessage.addListener(onNativeMessage);
 
-                message = { "text": "sign", "wallet": src, "PSW": $('#txtPSW').val(), "Tx": Tx };
-                var a = JSON.stringify(message);
-                port.postMessage(message);
-                appendMessage("Sent message: <b>" + JSON.stringify(message) + "</b>");
-                //alert(JSON.stringify(message))
-            }
-        });
-    });  
-}
+//                 message = { "text": "sign", "wallet": src, "PSW": $('#txtPSW').val(), "Tx": Tx };
+//                 var a = JSON.stringify(message);
+//                 port.postMessage(message);
+//                 appendMessage("Sent message: <b>" + JSON.stringify(message) + "</b>");
+//                 //alert(JSON.stringify(message))
+//             }
+//         });
+//     });  
+// }
 
 //function getObjectURL(file) {
 //    var url = null;
@@ -292,6 +343,13 @@ function getdata()
 //    return url;
 //} 
 
+chrome.runtime.onMessage.addListener(
+    function(request, sender, sendResponse) {
+        //alert("popupListener：fromBG" + request.result);
+        showBalance(request.result)
+    }
+);
+
 document.addEventListener('DOMContentLoaded', function () {
     //document.getElementById('connect-button').addEventListener(
     //    'click', connect);
@@ -303,8 +361,8 @@ document.addEventListener('DOMContentLoaded', function () {
     //    'click', sendTx);
     document.getElementById('butWalletClear').addEventListener(
         'click', walletClear);
-    document.getElementById('butImportNeoDun').addEventListener(
-        'click', showNeoDunInfo);
+    // document.getElementById('butImportNeoDun').addEventListener(
+    //     'click', showNeoDunInfo);
     //document.getElementById('butNeoDunAddrAdd').addEventListener(
     //    'click', addNeoDunAddr($('#txtNeoDunAddr').val()));
     document.getElementById('txtFile').addEventListener(

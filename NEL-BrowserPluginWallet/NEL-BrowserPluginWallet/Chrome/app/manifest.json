@@ -1,11 +1,22 @@
 ﻿{
-  // Extension ID: enngpbadkhnmhggmjlpionkananniopb
-  //"key": "MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQDcBHwzDvyBQ6bDppkIs9MP4ksKqCMyXQ/A52JivHZKh4YO/9vJsT3oaYhSpDCE9RPocOEQvwsHsFReW2nUEc6OLLyoCFFxIb7KkLGsmfakkut/fFdNJYh0xOTbSN8YvLWcqph09XAY2Y/f0AL7vfO1cuCqtkMt8hFrBGWxDdf9CQIDAQAB",
   "name": "NELPluginWallet",
   "version": "1.0",
   "manifest_version": 2,
   "description": "A Browser Plugin Wallet for NEO",
-  "background": { "scripts": [ "jquery-3.2.1.min.js", "jquery.jsonrpc.js", "jquery.base64.js", "background.js" ] },
+  "background": { 
+    "scripts": [ 
+      "jquery-3.2.1.min.js", 
+      "jquery.jsonrpc.js", 
+      "jquery.base64.js", 
+      "./neo-thinsdk/rollup/aes.js",
+      "./neo-thinsdk/component/aes.js",
+      "./neo-thinsdk/component/mode-ecb.js",
+      "./neo-thinsdk/component/pad-nopadding.js",
+      "./neo-thinsdk/jsrsasign.js",
+      "./neo-thinsdk/scrypt.js",
+      "./neo-thinsdk/neo-ts.js",
+      "background.js" 
+    ] },
   "browser_action": {
     "default_icon": {
       "19": "NEL_19.png",
@@ -15,19 +26,17 @@
     "default_popup": "main.html"
   },
   "permissions": [
-    //"nativeMessaging",
+    "storage",
     "tabs",
-    "*://localhost/*" //允许被操作的域名
+    "*://localhost/*" 
+  ],
+  "web_accessible_resources": [
+    "inject.js"
   ],
   "content_scripts": [
     {
-      "matches": [ "*://localhost/*" ], //允许注入的域名
+      "matches": [ "*://localhost/*" ], 
       "js": [ "jquery-3.2.1.min.js", "jquery.jsonrpc.js", "contentscript.js" ]
     }
   ]
-  //,
-  //"externally_connectable": {
-  //  "matches": [ "*://localhost/*" ] //允许发起调用扩展的域名
-  //}
-
 }
