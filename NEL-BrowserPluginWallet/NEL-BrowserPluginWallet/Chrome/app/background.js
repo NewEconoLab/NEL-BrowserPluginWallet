@@ -228,7 +228,7 @@ chrome.runtime.onMessage.addListener(
         if (request.key === "getAccount") {
             chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
                 chrome.tabs.sendMessage(tabs[0].id, {
-                    message: "getAccountRes",
+                    message: "getAccount_R",
                     data:{
                         addr : localStorage.wallets,
                         balance: localStorage.balances
@@ -303,7 +303,7 @@ chrome.runtime.onMessage.addListener(
                                         console.log("invoketxhexSigned= " + invoketxhexSigned);
     
                                         sendtxplussign(invoketxhex,invoketxhexSigned,pubkey.toHexString(),function(sendResult){
-                                            chrome.tabs.sendMessage(tabs[0].id, {message: "sendInvokeTx_Done",data:JSON.parse(sendResult).result[0].txid , result: sendResult}) 
+                                            chrome.tabs.sendMessage(tabs[0].id, {message: "sendInvokeTx_R",data:JSON.parse(sendResult).result[0].txid , result: sendResult}) 
                                         })                                                              
                                     });     
                                 })
@@ -390,7 +390,7 @@ chrome.runtime.onMessage.addListener(
                                     console.log("transfertxhexSigned= " + transfertxhexSigned);
 
                                     sendtxplussign(transfertxhex,transfertxhexSigned,pubkey.toHexString(),function(sendResult){
-                                        chrome.tabs.sendMessage(tabs[0].id, {message: "sendTransferTx_Done",data:JSON.parse(sendResult).result[0].txid , result: sendResult}) 
+                                        chrome.tabs.sendMessage(tabs[0].id, {message: "sendTransferTx_R",data:JSON.parse(sendResult).result[0].txid , result: sendResult}) 
                                     })                                                              
                                 });                                                                                               
                                 

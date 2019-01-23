@@ -1,11 +1,29 @@
 ﻿$(document).ready(function () {
     $('#butGetAccount').click(function (event) {
-        getAccount();
+        getAccount(function(res){
+            alert("getAccount res callback");
+            $("#addr").text(res.addr)
+            // $("#balance").text(request.msg.balance)
+            var balance = JSON.parse(res.balance)
+            $.each(balance, function( index, value ) {
+                var name = value.name[0].name;
+                if(name === "小蚁股") name = "NEO"
+                if(name === "小蚁币") name = "GAS"
+                var select = $("#listAssetID").append('<option value ="' + value.asset +'">' + name + ': ' + value.balance + '</option>');
+            });
+        });
     });
     $('#butDoInvokeTest').click(function (event) {
         sendInvokeTx(
             $('#invokeScriptHash').val(),
-            JSON.stringify(JSON.parse($('#invokeParam').val()))
+            JSON.stringify(JSON.parse($('#invokeParam').val())),
+            (res) =>{
+                alert("tx_send_done callback" + res.txid);
+                alert("Tansfar Success");
+                var txid = res.txid;
+                $("#txid").text('txid:' + txid);
+                $("#txid").attr('href', 'https://scan.nel.group/test/transaction/' + txid);
+            }
         );
         // $.post("https://api.otcgo.cn/testnet/transfer",
         //     {
@@ -32,7 +50,14 @@
             $("#addr").text(),
             $("#addr").text(),
             $("#listAssetID option:selected").val(),
-            $("#transferValue").val()
+            $("#transferValue").val(),
+            (res) =>{
+                alert("tx_send_done callback" + res.txid);
+                alert("Tansfar Success");
+                var txid = res.txid;
+                $("#txid").text('txid:' + txid);
+                $("#txid").attr('href', 'https://scan.nel.group/test/transaction/' + txid);
+            }
         );
         // $.post("https://api.otcgo.cn/testnet/broadcast",
         //     {
@@ -55,28 +80,22 @@
         //     });
     });
 
-    window.addEventListener("message", function(e)
-    {
-        request = e.data;
-        if(request.key === "getAccountRes")
-        {
-            $("#addr").text(request.msg.addr)
-            // $("#balance").text(request.msg.balance)
-            var balance = JSON.parse(request.msg.balance)
-            $.each(balance, function( index, value ) {
-                var name = value.name[0].name;
-                if(name === "小蚁股") name = "NEO"
-                if(name === "小蚁币") name = "GAS"
-                var select = $("#listAssetID").append('<option value ="' + value.asset +'">' + name + ': ' + value.balance + '</option>');
-            });
-        }
-        if(request.key === "tx_send_done")
-        {
-            alert("Tansfar Success");
-            var txid = request.msg.txid;
-            $("#txid").text('txid:' + txid);
-            $("#txid").attr('href', 'https://scan.nel.group/test/transaction/' + txid);
-        }
-    }, false);
+    // window.addEventListener("message", function(e)
+    // {
+    //     request = e.data;
+    //     if(request.key === "getAccount_R")
+    //     {
+    //         alert("getAccountRes listener");
+    //     }
+    //     if(request.key === "sendTransferTx_R")
+    //     {
+    //         alert("sendTransferTx_R listener");
+    //     }
+    //     if(request.key === "sendInvokeTx_R")
+    //     {
+    //         alert("sendInvokeTx_R listener");
+    //     }
+
+    // }, false);
 });
 

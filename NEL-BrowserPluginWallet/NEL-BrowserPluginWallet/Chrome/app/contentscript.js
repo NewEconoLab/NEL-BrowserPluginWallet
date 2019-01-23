@@ -56,6 +56,8 @@ window.addEventListener("message", function(e)
     }
     if(request.key === "sendTransferTx")
     {
+        alert('ContentScript: sendInvokeTx');
+
         chrome.runtime.sendMessage({
             key:'sendTransferTx', 
             msg:{
@@ -285,20 +287,29 @@ chrome.runtime.onMessage.addListener(
     function (request, sender, sendResponse) {
         alert("content_script Listener：fromBG" + request.result);
 
-        if (request.message === "getAccountRes"){
+        if (request.message === "getAccount_R"){
             window.postMessage({
-                key: "getAccountRes",
+                key: "getAccount_R",
                 msg: request.data
             }, '*')
         }
-        if (request.message === "sendInvokeTx_Done" || request.message === "sendTransferTx_Done") {
+        if (request.message === "sendTransferTx_R") {
             window.postMessage({
-                key:"tx_send_done",
+                key:"sendTransferTx_R",
                 msg:{
                     txid: request.data
                 }
             }, '*');
         }
+        if(request.message === "sendInvokeTx_R"){
+            window.postMessage({
+                key:"sendInvokeTx_R",
+                msg:{
+                    txid: request.data
+                }
+            }, '*');
+        }
+
 
         //if (request.message === "setTitel") {
         //    $("#cb_post_title_url").text("aaa");

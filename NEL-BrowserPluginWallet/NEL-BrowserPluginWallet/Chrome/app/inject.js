@@ -1,13 +1,22 @@
-getAccount = () =>{
+getAccount = (callback) =>{
     alert("inject getAccount");
 
     window.postMessage({
         key:"getAccount",
         msg:{}
     })
+
+    window.addEventListener("message", function(e)
+    {
+        request = e.data;
+        if(request.key === "getAccount_R")
+        {
+            callback(request.msg);
+        }
+    }, false);
 }
 
-sendTransferTx = (from,to,asset,value) =>{
+sendTransferTx = (from,to,asset,value,callback) =>{
     alert("inject sendTransferTx");
 
     window.postMessage({
@@ -19,9 +28,18 @@ sendTransferTx = (from,to,asset,value) =>{
             value: value
         }
     })
+
+    window.addEventListener("message", function(e)
+    {
+        request = e.data;
+        if(request.key === "sendTransferTx_R")
+        {
+            callback(request.msg);
+        }
+    }, false);
 }
 
-sendInvokeTx = (scriptHash,invokeParam) =>{
+sendInvokeTx = (scriptHash,invokeParam,callback) =>{
     alert("inject sendInvokeTx");
     window.postMessage({
         key:"sendInvokeTx",
@@ -30,6 +48,15 @@ sendInvokeTx = (scriptHash,invokeParam) =>{
             invokeParam: invokeParam
         }
     })
+
+    window.addEventListener("message", function(e)
+    {
+        request = e.data;
+        if(request.key === "sendInvokeTx_R")
+        {
+            callback(request.msg);
+        }
+    }, false);
 }
 
 function sendMsgTest() {
