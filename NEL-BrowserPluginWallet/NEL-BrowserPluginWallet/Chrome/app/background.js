@@ -52,6 +52,8 @@
 
 const nelApiUrl = 'https://api.nel.group/api/testnet';
 
+var testValue = "This is background！"
+
 setBadgeText = (text) =>{
     chrome.browserAction.setBadgeText({text: text});
     chrome.browserAction.setBadgeBackgroundColor({color: [255, 0, 0, 255]});
