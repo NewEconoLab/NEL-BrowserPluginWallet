@@ -1,4 +1,8 @@
-﻿$(document).ready(function () {
+﻿window.addEventListener('READY', function(event){
+    console.log('消息为：', event.detail.title);
+});
+
+$(document).ready(function () {
     $('#butGetAccount').click(function (event) {
         getAccount(function(res){
             alert("getAccount res callback");
