@@ -50,6 +50,13 @@
 //     alert(data);
 // })
 
+sendConnentEvent=(tabID)=>{
+    chrome.tabs.sendMessage(tabID, {
+        message: "event",
+        data:{event: "disconnented！from background"}
+    })
+}
+
 const nelApiUrl = 'https://api.nel.group/api/testnet';
 
 var testValue = "This is background！"
@@ -315,6 +322,8 @@ chrome.runtime.onMessage.addListener(
                             alert(e.target.textContent + ' clicked!');
                             notify.close()
 
+                            sendConnentEvent(tabs[0].id);
+
                             chrome.tabs.sendMessage(tabs[0].id, {result: "签名请求被拒绝！"})                      
                         }
                 }
@@ -402,6 +411,8 @@ chrome.runtime.onMessage.addListener(
                         _$('#notify_cancle').onclick = function (e) {
                             alert(e.target.textContent + ' clicked!');
                             notify.close()
+
+                            sendConnentEvent(tabs[0].id);
 
                             chrome.tabs.sendMessage(tabs[0].id, {result: "签名请求被拒绝！"})                      
                         }

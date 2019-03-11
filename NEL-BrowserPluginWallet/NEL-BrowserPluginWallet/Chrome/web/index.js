@@ -1,5 +1,5 @@
-﻿window.addEventListener('READY', function(event){
-    console.log('消息为：', event.detail.title);
+﻿window.addEventListener('CONNECTED', function(event){
+    console.log('消息为：', JSON.stringify(event.detail));
 });
 
 $(document).ready(function () {

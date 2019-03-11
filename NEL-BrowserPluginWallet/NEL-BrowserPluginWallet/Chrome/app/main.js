@@ -4,11 +4,20 @@
 $.base64.utf8encode = true;
 $.base64.utf8decode = true;
 
+sendConnentEvent=()=>{
+    chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
+        chrome.tabs.sendMessage(tabs[0].id, {
+            message: "event",
+            data:{event: "disconnented！from popup"}
+        })
+    }) 
+}
 
 //页面载入
 $(function(){
     //alert(localStorage.wallet);
-
+    //chrome.extension.getBackgroundPage().sendConnentEvent();
+    
     showWalletInfo();
     //alert($.base64.encode("好人"));
     //alert($.base64.decode($.base64.encode("好人")))  
@@ -24,6 +33,9 @@ sendMsg2BG = Msg => {
 
 
 function walletClear() {
+    sendConnentEvent();
+    //chrome.extension.getBackgroundPage().sendConnentEvent();
+
     //alert('clr');
     localStorage.walletFileName = "";
     localStorage.wallet = "";

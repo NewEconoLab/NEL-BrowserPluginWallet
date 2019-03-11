@@ -13,6 +13,7 @@
 //	chrome.runtime.sendMessage(msg);
 //}
 
+
 // 向页面注入JS
 function injectCustomJs(jsPath)
 {
@@ -285,8 +286,14 @@ function convertToHex(str) {
 
 chrome.runtime.onMessage.addListener(
     function (request, sender, sendResponse) {
-        alert("content_script Listener：fromBG" + request.result);
+        //alert("content_script Listener：fromBG" + request.result);
 
+        if (request.message === "event"){
+            window.postMessage({
+                key: "event",
+                msg: request.data
+            }, '*')
+        }
         if (request.message === "getAccount_R"){
             window.postMessage({
                 key: "getAccount_R",
