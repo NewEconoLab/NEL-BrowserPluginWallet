@@ -4,15 +4,6 @@
 $.base64.utf8encode = true;
 $.base64.utf8decode = true;
 
-sendConnentEvent=()=>{
-    chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
-        chrome.tabs.sendMessage(tabs[0].id, {
-            message: "event",
-            data:{event: "disconnented！from popup"}
-        })
-    }) 
-}
-
 //页面载入
 $(function(){
     //alert(localStorage.wallet);
@@ -33,8 +24,8 @@ sendMsg2BG = Msg => {
 
 
 function walletClear() {
-    sendConnentEvent();
-    //chrome.extension.getBackgroundPage().sendConnentEvent();
+    //sendConnentEvent();
+    chrome.extension.getBackgroundPage().sendConnentEventByTabURL();
 
     //alert('clr');
     localStorage.walletFileName = "";

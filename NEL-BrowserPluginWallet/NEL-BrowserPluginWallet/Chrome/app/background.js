@@ -50,11 +50,25 @@
 //     alert(data);
 // })
 
-sendConnentEvent=(tabID)=>{
-    chrome.tabs.sendMessage(tabID, {
-        message: "event",
-        data:{event: "disconnented！from background"}
-    })
+sendConnentEventByTabURL=()=>{
+    chrome.tabs.query({}, function (tabs) {
+        tabs.forEach(tab => {        
+            if(tab.url === localStorage.URL)
+            {
+                //alert(tab.url);
+                chrome.tabs.sendMessage(tab.id, {
+                    message: "event",
+                    data:{event: "disconnented！from background"}
+                })
+            }
+        });
+    }) 
+    // chrome.tabs.query({ url: localStorage.URL}, function (tabs) {
+    //     chrome.tabs.sendMessage(tabs[0].id, {
+    //         message: "event",
+    //         data:{event: "disconnented！from background"}
+    //     })
+    // }) 
 }
 
 const nelApiUrl = 'https://api.nel.group/api/testnet';
@@ -255,6 +269,9 @@ chrome.runtime.onMessage.addListener(
             //alert(invokeParam);
 
             chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
+                // alert("title" + tabs[0].title);
+                // alert("url" + tabs[0].url);
+                // alert("favIconUrl" + tabs[0].favIconUrl);
                 var notify = window.open ('notify.html', 'notify', 'height=600, width=350, top=150, left=100, toolbar=no, menubar=no, scrollbars=no,resizable=no,location=no, status=no')
                 notify.onload = function() {
                     alert("notify onLoad")
@@ -271,9 +288,17 @@ chrome.runtime.onMessage.addListener(
                     // var element=dom.getElementById("#refInfo");
                     // element.appendChild(para);
                     //$("#notify").contents().find("#refTitle").text(request.refInfo.refTitle);
-                    notify.document.getElementById("refTitle").innerHTML = request.msg.refInfo.refTitle
-                    notify.document.getElementById("refDomain").innerHTML = request.msg.refInfo.refDomain
-                    notify.document.getElementById("refIcoUrl").src = request.msg.refInfo.refIcoUrl
+
+                    // notify.document.getElementById("refTitle").innerHTML = request.msg.refInfo.refTitle
+                    // notify.document.getElementById("refDomain").innerHTML = request.msg.refInfo.refDomain
+                    // notify.document.getElementById("refIcoUrl").src = request.msg.refInfo.refIcoUrl
+
+                    notify.document.getElementById("refTitle").innerHTML = tabs[0].title
+                    notify.document.getElementById("refDomain").innerHTML = tabs[0].url
+                    notify.document.getElementById("refIcoUrl").src = tabs[0].favIconUrl
+
+                    localStorage.TITLE = tabs[0].title
+                    localStorage.URL = tabs[0].url
 
                     notify.document.getElementById("TxInfo").innerHTML = "<p>合约HASH： " + scriptHash + "</ p>" + "<p>合约入参： " + invokeParam + "</ p>"
 
@@ -322,7 +347,7 @@ chrome.runtime.onMessage.addListener(
                             alert(e.target.textContent + ' clicked!');
                             notify.close()
 
-                            sendConnentEvent(tabs[0].id);
+                            sendConnentEventByTabURL()
 
                             chrome.tabs.sendMessage(tabs[0].id, {result: "签名请求被拒绝！"})                      
                         }
@@ -362,9 +387,15 @@ chrome.runtime.onMessage.addListener(
                     // var element=dom.getElementById("#refInfo");
                     // element.appendChild(para);
                     //$("#notify").contents().find("#refTitle").text(request.refInfo.refTitle);
-                    notify.document.getElementById("refTitle").innerHTML = request.msg.refInfo.refTitle
-                    notify.document.getElementById("refDomain").innerHTML = request.msg.refInfo.refDomain
-                    notify.document.getElementById("refIcoUrl").src = request.msg.refInfo.refIcoUrl
+
+                    // notify.document.getElementById("refTitle").innerHTML = request.msg.refInfo.refTitle
+                    // notify.document.getElementById("refDomain").innerHTML = request.msg.refInfo.refDomain
+                    // notify.document.getElementById("refIcoUrl").src = request.msg.refInfo.refIcoUrl
+
+                    notify.document.getElementById("refTitle").innerHTML = tabs[0].title
+                    notify.document.getElementById("refDomain").innerHTML = tabs[0].url
+                    notify.document.getElementById("refIcoUrl").src = tabs[0].favIconUrl
+
                     var assetName = request.msg.asset;
                     if(assetName === '0xc56f33fc6ecfcd0c225c4ab356fee59390af8560be0e930faebe74a6daff7c9b') assetName = 'NEO'
                     if(assetName === '0x602c79718b16e442de58778e148d0b1084e3b2dffd5de6b7b16cee7969282de7') assetName = 'GAS'              
@@ -412,7 +443,7 @@ chrome.runtime.onMessage.addListener(
                             alert(e.target.textContent + ' clicked!');
                             notify.close()
 
-                            sendConnentEvent(tabs[0].id);
+                            sendConnentEventByTabURL();
 
                             chrome.tabs.sendMessage(tabs[0].id, {result: "签名请求被拒绝！"})                      
                         }
